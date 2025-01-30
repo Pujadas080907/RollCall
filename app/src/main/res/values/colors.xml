@@ -10,6 +10,10 @@
 
     <color name="main_color">#0FB0B8</color>
     <color name="bg_color">#CFFFFD</color>
+    <color name="card_color">#7FF4FA</color>
+
+    <color name="cardStart_color">#FF74E4FF</color>
+    <color name="cardEnd_color">#FFB9F9FC</color>
 
 
 </resources>
