@@ -40,7 +40,8 @@ class DegreeViewModel(application: Application) : AndroidViewModel(application) 
 
     fun updateDegree(degree: Degree) {
         viewModelScope.launch {
-            degreeDao.updateDegree(degree.id, degree.degreeName)
+            degreeDao.updateDegree(degree.id, degree.degreeName, degree.year, degree.section)
         }
     }
+
 }

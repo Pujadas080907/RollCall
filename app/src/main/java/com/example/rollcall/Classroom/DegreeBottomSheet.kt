@@ -1,6 +1,7 @@
 package com.example.rollcall.Classroom
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,7 +13,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -40,10 +43,17 @@ fun DegreeBottomSheet(
     degreeViewModel: DegreeViewModel,
     isEdit: Boolean = false,
     initialDegreeName: String = "",
+    initialYear: Int? = null,
+    initialSection: String? = null,
     onDismiss: () -> Unit,
     onDegreeUpdated: (Degree) -> Unit
 ) {
     var degreeName by remember { mutableStateOf(initialDegreeName) }
+    var selectedYear by remember { mutableStateOf(initialYear) }
+    var selectedSection by remember { mutableStateOf(initialSection) }
+
+    val yearOptions = (1..5).toList()
+    val sectionOptions = listOf("A", "B", "C", "D")
 
     ModalBottomSheet(
         onDismissRequest = { onDismiss() },
@@ -54,7 +64,7 @@ fun DegreeBottomSheet(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(Color.White)
-                .padding(16.dp),
+                .padding(start = 16.dp, top = 16.dp, end = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
@@ -79,6 +89,86 @@ fun DegreeBottomSheet(
                 )
             )
 
+            Spacer(modifier = Modifier.height(15.dp))
+
+            // Year Dropdown
+            var yearExpanded by remember { mutableStateOf(false) }
+            ExposedDropdownMenuBox(
+                expanded = yearExpanded,
+                onExpandedChange = { yearExpanded = !yearExpanded }
+            ) {
+                OutlinedTextField(
+                    value = selectedYear?.toString() ?: "",
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Choose Year", color = Color.Gray) },
+                    placeholder = { Text("Choose Year", color = Color.Black) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .menuAnchor(),
+                    shape = RoundedCornerShape(15.dp),
+                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                        focusedTextColor = Color.Black,
+                        focusedBorderColor = colorResource(id = R.color.main_color),
+                        unfocusedBorderColor = Color.Gray
+                    )
+                )
+                ExposedDropdownMenu(
+                    expanded = yearExpanded,
+                    onDismissRequest = { yearExpanded = false }
+                ) {
+                    yearOptions.forEach { year ->
+                        DropdownMenuItem(
+                            text = { Text("Year $year") },
+                            onClick = {
+                                selectedYear = year
+                                yearExpanded = false
+                            }
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(15.dp))
+
+            // Section Dropdown
+            var sectionExpanded by remember { mutableStateOf(false) }
+            ExposedDropdownMenuBox(
+                expanded = sectionExpanded,
+                onExpandedChange = { sectionExpanded = !sectionExpanded }
+            ) {
+                OutlinedTextField(
+                    value = selectedSection ?: "",
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Choose Section",color = Color.Gray) },
+                    placeholder = { Text("Choose Section",color = Color.Black) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .menuAnchor(),
+                    shape = RoundedCornerShape(15.dp),
+                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                        focusedTextColor = Color.Black,
+                        focusedBorderColor = colorResource(id = R.color.main_color),
+                        unfocusedBorderColor = Color.Gray
+                    )
+                )
+                ExposedDropdownMenu(
+                    expanded = sectionExpanded,
+                    onDismissRequest = { sectionExpanded = false }
+                ) {
+                    sectionOptions.forEach { section ->
+                        DropdownMenuItem(
+                            text = { Text("Section $section") },
+                            onClick = {
+                                selectedSection = section
+                                sectionExpanded = false
+                            }
+                        )
+                    }
+                }
+            }
+
             Spacer(modifier = Modifier.height(24.dp))
 
             Row(
@@ -95,8 +185,13 @@ fun DegreeBottomSheet(
 
                 Button(
                     onClick = {
-                        if (degreeName.isNotBlank()) {
-                            val updatedDegree = Degree(degreeName = degreeName, id = 0)
+                        if (degreeName.isNotBlank() && selectedYear != null && selectedSection != null) {
+                            val updatedDegree = Degree(
+                                id = 0,
+                                degreeName = degreeName,
+                                year = selectedYear!!,
+                                section = selectedSection!!
+                              )
                             onDegreeUpdated(updatedDegree)
                             onDismiss()
                         }
@@ -108,7 +203,7 @@ fun DegreeBottomSheet(
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(30.dp))
         }
     }
 }

@@ -93,7 +93,7 @@ fun DegreeScreen(navController: NavController, degreeViewModel: DegreeViewModel)
                     fontSize = 18.sp,
                     color = Color.Black,
                     fontFamily = laila,
-                    fontWeight = FontWeight.Medium
+                    fontWeight = FontWeight.Bold
                 )
             } else {
                 LazyVerticalGrid(
@@ -104,7 +104,7 @@ fun DegreeScreen(navController: NavController, degreeViewModel: DegreeViewModel)
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(degreeList) { degree ->
-                        DegreeCard(degree, degreeViewModel) {
+                        DegreeCard(degree, degreeViewModel, navController) {
                             selectedDegree = degree
                             showBottomSheet = true
                         }

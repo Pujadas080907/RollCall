@@ -8,5 +8,7 @@ data class Degree(
 
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
-    var degreeName: String
+    var degreeName: String,
+    var year: Int,
+    var section: String
 )
