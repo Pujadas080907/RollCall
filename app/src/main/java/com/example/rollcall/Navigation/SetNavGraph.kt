@@ -31,10 +31,12 @@ fun SetNavGraph(navController: NavHostController){
             MonthViewScreen(navController = navController)
         }
 
-        composable("degreeDetail/{degreeId}/{degreeName}") { backStackEntry ->
+        composable("degreeDetail/{degreeId}/{degreeName}/{degreeYear}/{degreeSection}") { backStackEntry ->
             val degreeId = backStackEntry.arguments?.getString("degreeId")?.toInt() ?: 0
             val degreeName = backStackEntry.arguments?.getString("degreeName") ?: ""
-            DegreeDetailScreen(navController = navController, degreeId = degreeId, degreeName = degreeName)
+            val degreeYear = backStackEntry.arguments?.getString("degreeYear")?.toIntOrNull() ?: 1
+            val degreeSection = backStackEntry.arguments?.getString("degreeSection") ?: "A"
+            DegreeDetailScreen(navController = navController, degreeId = degreeId, degreeName = degreeName,degreeYear = degreeYear, degreeSection = degreeSection)
         }
     }
 }

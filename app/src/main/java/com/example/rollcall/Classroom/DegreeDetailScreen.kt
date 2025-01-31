@@ -3,6 +3,7 @@ package com.example.rollcall.Classroom
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -22,6 +23,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,39 +40,31 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.rollcall.Database.Degree
 import com.example.rollcall.R
+import com.example.rollcall.studentlist.StudentBottomSheet
 import com.example.rollcall.ui.theme.laila
 import com.example.rollcall.ui.theme.title
+import kotlin.text.Typography.degree
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DegreeDetailScreen(
     navController: NavController,
     degreeId: Int,
-    degreeName: String,) {
+    degreeName: String,
+    degreeYear: Int,
+    degreeSection: String
+) {
+    var showSheet by remember { mutableStateOf(false) }
+
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.fillMaxWidth()
                     ) {
-
-                        IconButton(
-                            onClick = {
-                                navController.popBackStack()
-                            }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.ArrowBack,
-                                contentDescription = "Back",
-                                tint = Color.White
-                            )
-                        }
-
-
                         Text(
                             text = degreeName,
                             fontSize = 20.sp,
@@ -77,32 +74,46 @@ fun DegreeDetailScreen(
                             textAlign = TextAlign.Center
                         )
 
-                        IconButton(
-                            onClick = {
-
-                            }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.MoreVert,
-                                contentDescription = "menu",
-                                tint = Color.White
-                            )
-                        }
+                        Text(
+                            text = "${degreeYear.ordinalSuffix()} Year / Sec: $degreeSection",
+                            fontSize = 14.sp,
+                            color = Color.White,
+                            fontFamily = laila,
+                            fontWeight = FontWeight.Medium
+                        )
                     }
-
+                },
+                navigationIcon = {
+                    IconButton(
+                        onClick = { navController.popBackStack() }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Back",
+                            tint = Color.White
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { /* More options */ }) {
+                        Icon(
+                            imageVector = Icons.Default.MoreVert,
+                            contentDescription = "Menu",
+                            tint = Color.White
+                        )
+                    }
                 },
                 colors = TopAppBarDefaults.smallTopAppBarColors(
                     containerColor = colorResource(id = R.color.main_color),
                     titleContentColor = Color.White
                 )
-
             )
         },
+
+
         floatingActionButton = {
             FloatingActionButton(
-                onClick = {
-
-                          },
+                onClick = { showSheet = true },
                 modifier = Modifier
                     .size(50.dp)
                     .clip(CircleShape),
@@ -112,8 +123,7 @@ fun DegreeDetailScreen(
                     painter = painterResource(id = R.drawable.plus_icon),
                     contentDescription = "Add",
                     tint = Color.White,
-                    modifier = Modifier
-                        .size(35.dp)
+                    modifier = Modifier.size(35.dp)
                 )
             }
         }
@@ -134,4 +144,13 @@ fun DegreeDetailScreen(
             )
         }
     }
+    if (showSheet) {
+        StudentBottomSheet(
+            onDismiss = { showSheet = false },
+            onAddStudent = { name, enrollmentNo ->
+                // TODO: Handle adding student logic here
+            }
+        )
+    }
 }
+

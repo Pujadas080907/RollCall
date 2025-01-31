@@ -88,8 +88,9 @@ fun DegreeCard(degree: Degree, degreeViewModel: DegreeViewModel, navController: 
                 shape = RoundedCornerShape(15.dp)
             )
             .clickable {
-                navController.navigate("degreeDetail/${degree.id}/${degree.degreeName}")
-            }
+                navController.navigate("degreeDetail/${degree.id}/${degree.degreeName}/${degree.year}/${degree.section}")
+
+                }
             .padding(10.dp)
             .aspectRatio(1f),
         contentAlignment = Alignment.Center
