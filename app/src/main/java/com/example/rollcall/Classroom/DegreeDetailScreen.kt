@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -18,6 +19,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -169,6 +171,11 @@ fun DegreeDetailScreen(
 }
     @Composable
     fun StudentItem(student: Student) {
+
+        var isPresent by remember { mutableStateOf(false) }
+        var isAbsent by remember { mutableStateOf(false) }
+
+
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -210,10 +217,61 @@ fun DegreeDetailScreen(
                 Spacer(modifier = Modifier.width(12.dp))
 
                 Text(
-                    text = "${student.fullName} | ${student.enrollmentNo}",
+                    text = " ${student.fullName} \n ${student.enrollmentNo}",
                     modifier = Modifier.weight(1f),
                     color = Color.Black
                 )
+
+                Text(
+                    text = "P",
+                    color = Color.Black,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = title
+                )
+
+
+                Checkbox(
+                    checked = isPresent,
+                    onCheckedChange = {
+                        isPresent = it
+                        if (it) isAbsent = false
+                    },
+                    colors = CheckboxDefaults.colors(
+                        checkedColor = Color.Green,
+                        uncheckedColor = Color.Gray
+                    )
+                )
+
+                Text(
+                    text = "A",
+                    color = Color.Black,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = title
+                )
+
+
+                Spacer(modifier = Modifier.width(5.dp))
+
+                Box(
+                    modifier = Modifier
+                        .size(20.dp)
+                        .border(2.dp, Color.Gray, shape = RectangleShape)
+                        .background(if (isAbsent) Color.Red else Color.Transparent)
+                        .clickable {
+                            isAbsent = !isAbsent
+                            if (isAbsent) isPresent = false
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (isAbsent) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.img),
+                            contentDescription = "Absent",
+                            tint = Color.Black,
+                            modifier = Modifier.size(14.dp)
+                        )
+                    }
+                }
             }
         }
     }
