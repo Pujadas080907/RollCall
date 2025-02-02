@@ -9,10 +9,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.rollcall.Classroom.DegreeDetailScreen
 import com.example.rollcall.Classroom.DegreeScreen
-import com.example.rollcall.Database.Degree
 import com.example.rollcall.Database.DegreeViewModel
 import com.example.rollcall.Database.DegreeViewModelFactory
-import com.example.rollcall.MothView.MonthViewScreen
+import com.example.rollcall.Mothview.MonthViewScreen
+import com.example.rollcall.studentlists.StudentViewModel
+import com.example.rollcall.studentlists.StudentViewModelFactory
 
 
 @Composable
@@ -36,7 +37,15 @@ fun SetNavGraph(navController: NavHostController){
             val degreeName = backStackEntry.arguments?.getString("degreeName") ?: ""
             val degreeYear = backStackEntry.arguments?.getString("degreeYear")?.toIntOrNull() ?: 1
             val degreeSection = backStackEntry.arguments?.getString("degreeSection") ?: "A"
-            DegreeDetailScreen(navController = navController, degreeId = degreeId, degreeName = degreeName,degreeYear = degreeYear, degreeSection = degreeSection)
+            val studentViewModel: StudentViewModel = viewModel(
+                factory = StudentViewModelFactory(application = LocalContext.current.applicationContext as Application)
+            )
+            DegreeDetailScreen(navController = navController,
+                degreeId = degreeId,
+                degreeName = degreeName,
+                degreeYear = degreeYear,
+                degreeSection = degreeSection,
+                studentViewModel = studentViewModel)
         }
     }
 }

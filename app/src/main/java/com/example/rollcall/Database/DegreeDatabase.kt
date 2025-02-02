@@ -4,12 +4,15 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.example.rollcall.studentlists.Student
+import com.example.rollcall.studentlists.StudentDao
 
 
-@Database(entities = [Degree::class], version = 2, exportSchema = false)
+@Database(entities = [Degree::class, Student::class], version = 3, exportSchema = false)
  abstract class DegreeDatabase: RoomDatabase() {
 
  abstract fun degreeDao(): DegreeDao
+ abstract fun studentDao(): StudentDao
 
  companion object {
   @Volatile
@@ -21,8 +24,7 @@ import androidx.room.RoomDatabase
      context.applicationContext,
      DegreeDatabase::class.java,
      "degree_database"
-    )
-     .fallbackToDestructiveMigration()
+    ).fallbackToDestructiveMigration()
      .build()
     INSTANCE = instance
     instance

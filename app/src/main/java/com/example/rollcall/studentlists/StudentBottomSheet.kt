@@ -8,6 +8,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -15,6 +16,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.rollcall.R
+import com.example.rollcall.ui.theme.laila
 import com.example.rollcall.ui.theme.title
 
 
@@ -59,7 +61,12 @@ fun StudentBottomSheet(
                 OutlinedTextField(
                     value = fullName,
                     onValueChange = { fullName = it },
-                    label = { Text("Full Name", color = Color.Gray) },
+                    label = {
+                        Text("Full Name",
+                            color = Color.Gray,
+                            fontFamily = laila,
+                            fontWeight = FontWeight.Medium
+                            ) },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(15.dp),
                     colors = TextFieldDefaults.outlinedTextFieldColors(
@@ -75,7 +82,13 @@ fun StudentBottomSheet(
                 OutlinedTextField(
                     value = enrollmentNo,
                     onValueChange = { enrollmentNo = it },
-                    label = { Text("Enrollment No.", color = Color.Gray) },
+                    label = {
+                        Text("Enrollment No.",
+                            color = Color.Gray,
+                            fontFamily = laila,
+                            fontWeight = FontWeight.Medium
+                        )
+                            },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(15.dp),
                     colors = TextFieldDefaults.outlinedTextFieldColors(
@@ -89,20 +102,32 @@ fun StudentBottomSheet(
 
                 // Buttons Row
                 Row(
-                    horizontalArrangement = Arrangement.End,
+                    horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    TextButton(onClick = onDismiss) {
-                        Text("Cancel")
+                    Button(
+                        onClick = onDismiss,
+                        colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.main_color)),
+                        modifier = Modifier.size(width = 100.dp, height = 45.dp)
+                    ) {
+                        Text(
+                            "Cancel",
+                            color = Color.White,
+                            )
                     }
+
                     Spacer(modifier = Modifier.width(8.dp))
                     Button(
                         onClick = {
                             onAddStudent(fullName.text, enrollmentNo.text)
                             onDismiss()
-                        }
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.main_color)),
+                        modifier = Modifier.size(width = 100.dp, height = 45.dp)
                     ) {
-                        Text("Add")
+                        Text("Add",
+                            color = Color.White,
+                        )
                     }
                 }
             }

@@ -1,36 +1,24 @@
 package com.example.rollcall.Classroom
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -38,12 +26,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.rollcall.Database.Degree
 import com.example.rollcall.R
+import com.example.rollcall.studentlists.Student
+import com.example.rollcall.studentlists.StudentViewModel
 import com.example.rollcall.studentlist.StudentBottomSheet
 import com.example.rollcall.ui.theme.laila
 import com.example.rollcall.ui.theme.title
-import kotlin.text.Typography.degree
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -52,10 +40,12 @@ fun DegreeDetailScreen(
     degreeId: Int,
     degreeName: String,
     degreeYear: Int,
-    degreeSection: String
+    degreeSection: String,
+    studentViewModel: StudentViewModel
 ) {
     var showSheet by remember { mutableStateOf(false) }
 
+    val students by studentViewModel.students.collectAsState(initial = emptyList())
 
     Scaffold(
         topBar = {
@@ -110,7 +100,7 @@ fun DegreeDetailScreen(
             )
         },
 
-
+        containerColor = Color.White,
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { showSheet = true },
@@ -127,30 +117,102 @@ fun DegreeDetailScreen(
                 )
             }
         }
+
+
     ) { paddingValues ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.White)
-                .padding(paddingValues),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "Click on the \"+\" button to add a new student",
-                fontSize = 15.sp,
-                color = Color.Black,
-                fontFamily = laila,
-                fontWeight = FontWeight.Bold
+
+        Column(modifier = Modifier.padding(top = 16.dp)) {
+
+            if (students.isEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "No students found. Click \"+\" to add a new student.",
+                        fontSize = 15.sp,
+                        color = Color.Black,
+                        fontFamily = laila,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                ) {
+                    items(students) { student ->
+                        StudentItem(student)
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+                    item{
+                        Spacer(modifier = Modifier.height(60.dp))
+                    }
+                }
+            }
+        }
+
+        if (showSheet) {
+            StudentBottomSheet(
+                onDismiss = { showSheet = false },
+                onAddStudent = { name, enrollmentNo ->
+                    studentViewModel.addStudent(name, enrollmentNo)
+                    showSheet = false
+                }
             )
         }
     }
-    if (showSheet) {
-        StudentBottomSheet(
-            onDismiss = { showSheet = false },
-            onAddStudent = { name, enrollmentNo ->
-                // TODO: Handle adding student logic here
-            }
-        )
-    }
 }
+    @Composable
+    fun StudentItem(student: Student) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .shadow(10.dp)
+                .background(
+                    brush = Brush.linearGradient(
+                        colors = listOf(
+                            colorResource(id = R.color.cardStart_color),
+                            colorResource(id = R.color.cardEnd_color)
+                        )
+                    ),
+                )
+                .border(1.dp, color = colorResource(id = R.color.main_color))
 
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .background(Color.White)
+                        .padding(4.dp)
+                ) {
+
+                    Image(
+                        painter = painterResource(id = R.drawable.profile_image),
+                        contentDescription = "Student Profile Image",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                }
+
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Text(
+                    text = "${student.fullName} | ${student.enrollmentNo}",
+                    modifier = Modifier.weight(1f),
+                    color = Color.Black
+                )
+            }
+        }
+    }

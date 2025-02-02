@@ -1,4 +1,4 @@
-package com.example.rollcall.MothView
+package com.example.rollcall.Mothview
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
