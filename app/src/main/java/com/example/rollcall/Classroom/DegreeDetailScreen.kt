@@ -45,8 +45,9 @@ fun DegreeDetailScreen(
 ) {
     var showSheet by remember { mutableStateOf(false) }
 
-    val students by studentViewModel.students.collectAsState(initial = emptyList())
-
+    //val students by studentViewModel.students.collectAsState(initial = emptyList())
+    val students by studentViewModel.getStudentsByDegreeYearSection(degreeId, degreeYear, degreeSection)
+        .collectAsState(initial = emptyList())
     Scaffold(
         topBar = {
             TopAppBar(
@@ -132,7 +133,7 @@ fun DegreeDetailScreen(
                 ) {
                     Text(
                         text = "No students found. Click \"+\" to add a new student.",
-                        fontSize = 15.sp,
+                        fontSize = 14.sp,
                         color = Color.Black,
                         fontFamily = laila,
                         fontWeight = FontWeight.Bold
@@ -159,7 +160,7 @@ fun DegreeDetailScreen(
             StudentBottomSheet(
                 onDismiss = { showSheet = false },
                 onAddStudent = { name, enrollmentNo ->
-                    studentViewModel.addStudent(name, enrollmentNo)
+                    studentViewModel.addStudent(name, enrollmentNo,degreeId,degreeYear,degreeSection)
                     showSheet = false
                 }
             )

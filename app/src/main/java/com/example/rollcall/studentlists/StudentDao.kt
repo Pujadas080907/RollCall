@@ -13,7 +13,12 @@ interface StudentDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertStudent(student: Student)
 
-    @Query("SELECT * FROM students ORDER BY id DESC")
-    fun getAllStudents(): Flow<List<Student>>
+
+    @Query("""
+    SELECT * FROM students 
+    WHERE degreeId = :degreeId AND year = :year AND section = :section 
+    ORDER BY CAST(SUBSTR(enrollmentNo, LENGTH(enrollmentNo) - 2, 3) AS INTEGER) ASC
+""")
+    fun getStudentsByDegreeYearSection(degreeId: Int, year: Int, section: String): Flow<List<Student>>
 
 }

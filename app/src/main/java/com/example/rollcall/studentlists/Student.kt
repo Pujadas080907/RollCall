@@ -10,5 +10,8 @@ data class Student(
     val id: Int = 0,
     val fullName: String,
     val enrollmentNo: String,
+    val degreeId: Int,
+    val year: Int,
+    val section: String
 
 )

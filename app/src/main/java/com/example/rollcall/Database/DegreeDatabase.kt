@@ -8,7 +8,7 @@ import com.example.rollcall.studentlists.Student
 import com.example.rollcall.studentlists.StudentDao
 
 
-@Database(entities = [Degree::class, Student::class], version = 3, exportSchema = false)
+@Database(entities = [Degree::class, Student::class], version = 4, exportSchema = false)
  abstract class DegreeDatabase: RoomDatabase() {
 
  abstract fun degreeDao(): DegreeDao
