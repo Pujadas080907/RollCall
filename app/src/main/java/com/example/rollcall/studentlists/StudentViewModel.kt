@@ -34,5 +34,17 @@ class StudentViewModel(application: Application) : AndroidViewModel(application)
             studentDao.insertStudent(student)
         }
     }
+    fun deleteStudent(student: Student) {
+        viewModelScope.launch {
+            studentDao.deleteStudent(student)
+        }
+    }
+
+    fun updateStudent(student: Student) {
+        viewModelScope.launch {
+            studentDao.updateStudent(student)
+        }
+    }
+
 
 }

@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.rollcall.R
+import com.example.rollcall.studentlists.Student
 import com.example.rollcall.ui.theme.laila
 import com.example.rollcall.ui.theme.title
 
@@ -23,15 +24,16 @@ import com.example.rollcall.ui.theme.title
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StudentBottomSheet(
+    student: Student? = null,
     onDismiss: () -> Unit,
-    onAddStudent: (String, String) -> Unit
+    onSaveStudent: (String, String) -> Unit
 ) {
-    var fullName by remember { mutableStateOf(TextFieldValue("")) }
-    var enrollmentNo by remember { mutableStateOf(TextFieldValue("")) }
+    var fullName by remember { mutableStateOf(TextFieldValue(student?.fullName ?: "")) }
+    var enrollmentNo by remember { mutableStateOf(TextFieldValue(student?.enrollmentNo ?: "")) }
 
     Dialog(
         onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false) // Full-width modal
+        properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
         Surface(
             shape = MaterialTheme.shapes.medium,
@@ -39,34 +41,26 @@ fun StudentBottomSheet(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
-                .border(2.dp, color = colorResource(id = R.color.main_color),MaterialTheme.shapes.medium)
+                .border(2.dp, color = colorResource(id = R.color.main_color), MaterialTheme.shapes.medium)
         ) {
             Column(
                 modifier = Modifier.padding(16.dp)
             ) {
-                // Title
                 Text(
-                    text = "Add New Student",
+                    text = if (student == null) "Add New Student" else "Edit Student",
                     fontSize = 20.sp,
                     color = Color.Black,
                     fontFamily = title,
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.Center
-
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Full Name Field
                 OutlinedTextField(
                     value = fullName,
                     onValueChange = { fullName = it },
-                    label = {
-                        Text("Full Name",
-                            color = Color.Gray,
-                            fontFamily = laila,
-                            fontWeight = FontWeight.Medium
-                            ) },
+                    label = { Text("Full Name", color = Color.Gray, fontFamily = laila) },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(15.dp),
                     colors = TextFieldDefaults.outlinedTextFieldColors(
@@ -78,17 +72,10 @@ fun StudentBottomSheet(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // Enrollment No. Field
                 OutlinedTextField(
                     value = enrollmentNo,
                     onValueChange = { enrollmentNo = it },
-                    label = {
-                        Text("Enrollment No.",
-                            color = Color.Gray,
-                            fontFamily = laila,
-                            fontWeight = FontWeight.Medium
-                        )
-                            },
+                    label = { Text("Enrollment No.", color = Color.Gray, fontFamily = laila) },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(15.dp),
                     colors = TextFieldDefaults.outlinedTextFieldColors(
@@ -100,7 +87,6 @@ fun StudentBottomSheet(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Buttons Row
                 Row(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier.fillMaxWidth()
@@ -110,27 +96,24 @@ fun StudentBottomSheet(
                         colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.main_color)),
                         modifier = Modifier.size(width = 100.dp, height = 45.dp)
                     ) {
-                        Text(
-                            "Cancel",
-                            color = Color.White,
-                            )
+                        Text("Cancel", color = Color.White)
                     }
 
                     Spacer(modifier = Modifier.width(8.dp))
+
                     Button(
                         onClick = {
-                            onAddStudent(fullName.text, enrollmentNo.text)
+                            onSaveStudent(fullName.text, enrollmentNo.text)
                             onDismiss()
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.main_color)),
                         modifier = Modifier.size(width = 100.dp, height = 45.dp)
                     ) {
-                        Text("Add",
-                            color = Color.White,
-                        )
+                        Text(if (student == null) "Add" else "Update", color = Color.White)
                     }
                 }
             }
         }
     }
 }
+

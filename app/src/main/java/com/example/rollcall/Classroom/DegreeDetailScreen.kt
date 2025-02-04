@@ -1,15 +1,19 @@
 package com.example.rollcall.Classroom
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -46,6 +50,7 @@ fun DegreeDetailScreen(
     studentViewModel: StudentViewModel
 ) {
     var showSheet by remember { mutableStateOf(false) }
+    var editedStudent by remember { mutableStateOf<Student?>(null) }
 
     //val students by studentViewModel.students.collectAsState(initial = emptyList())
     val students by studentViewModel.getStudentsByDegreeYearSection(degreeId, degreeYear, degreeSection)
@@ -105,19 +110,43 @@ fun DegreeDetailScreen(
 
         containerColor = Color.White,
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = { showSheet = true },
+
+            Row(
                 modifier = Modifier
-                    .size(50.dp)
-                    .clip(CircleShape),
-                containerColor = colorResource(id = R.color.main_color)
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+
             ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.plus_icon),
-                    contentDescription = "Add",
-                    tint = Color.White,
-                    modifier = Modifier.size(35.dp)
-                )
+                Button(
+                    onClick = { /* Save action */ },
+                    modifier = Modifier
+                        .padding(start = 25.dp)
+                        .height(48.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.main_color))
+                ) {
+                    Text(
+                        text = "Save",
+                        color = Color.White,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                FloatingActionButton(
+                    onClick = { showSheet = true },
+                    modifier = Modifier
+                        .size(50.dp)
+                        .clip(CircleShape),
+                    containerColor = colorResource(id = R.color.main_color)
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.plus_icon),
+                        contentDescription = "Add",
+                        tint = Color.White,
+                        modifier = Modifier.size(35.dp)
+                    )
+                }
             }
         }
 
@@ -148,7 +177,17 @@ fun DegreeDetailScreen(
                         .padding(paddingValues)
                 ) {
                     items(students) { student ->
-                        StudentItem(student)
+                        StudentItem(
+                            student,
+                            onEditStudent = { selectedStudent ->
+                                editedStudent = selectedStudent
+                                showSheet = true
+                            },
+                            onDeleteStudent = { selectedStudent ->
+                                studentViewModel.deleteStudent(selectedStudent)
+
+                            }
+                        )
                         Spacer(modifier = Modifier.height(8.dp))
                     }
                     item{
@@ -158,23 +197,41 @@ fun DegreeDetailScreen(
             }
         }
 
+
         if (showSheet) {
             StudentBottomSheet(
-                onDismiss = { showSheet = false },
-                onAddStudent = { name, enrollmentNo ->
-                    studentViewModel.addStudent(name, enrollmentNo,degreeId,degreeYear,degreeSection)
+                student = editedStudent,
+                onDismiss = {
+                    showSheet = false
+                    editedStudent = null
+                },
+                onSaveStudent = { name, enrollmentNo ->
+                    if (editedStudent == null) {
+                        studentViewModel.addStudent(name, enrollmentNo, degreeId, degreeYear, degreeSection)
+                    } else {
+                        studentViewModel.updateStudent(
+                            editedStudent!!.copy(fullName = name, enrollmentNo = enrollmentNo)
+                        )
+                    }
                     showSheet = false
                 }
             )
         }
     }
 }
+
+
+    @OptIn(ExperimentalFoundationApi::class)
     @Composable
-    fun StudentItem(student: Student) {
+    fun StudentItem(
+        student: Student,
+        onEditStudent: (Student) -> Unit,
+        onDeleteStudent: (Student) -> Unit) {
 
         var isPresent by remember { mutableStateOf(false) }
         var isAbsent by remember { mutableStateOf(false) }
-
+        var showMenu by remember { mutableStateOf(false) }
+        var showDeleteDialog by remember { mutableStateOf(false) }
 
         Box(
             modifier = Modifier
@@ -189,6 +246,10 @@ fun DegreeDetailScreen(
                     ),
                 )
                 .border(1.dp, color = colorResource(id = R.color.main_color))
+                .combinedClickable(
+                    onClick = {},
+                    onLongClick = { showMenu = true }
+                )
 
         ) {
             Row(
@@ -273,5 +334,67 @@ fun DegreeDetailScreen(
                     }
                 }
             }
+            DropdownMenu(
+                expanded = showMenu,
+                onDismissRequest = { showMenu = false }
+            ) {
+                DropdownMenuItem(
+                    text = { Text("Edit") },
+                    onClick = {
+                        showMenu = false
+                        onEditStudent(student)
+                    },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = "Edit"
+                        )
+                    }
+                )
+                DropdownMenuItem(
+                    text = { Text("Delete") },
+                    onClick = {
+                        showMenu = false
+                        showDeleteDialog = true
+
+                    },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Delete",
+                            tint = Color.Red
+                        )
+                    }
+                )
+            }
+        }
+        // **Delete Confirmation Dialog**
+        if (showDeleteDialog) {
+            AlertDialog(
+                onDismissRequest = { showDeleteDialog = false },
+                title = { Text("Confirm Deletion") },
+                text = { Text("Are you sure you want to delete this student?") },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            onDeleteStudent(student)
+                            showDeleteDialog = false
+                        },
+                        modifier = Modifier.padding(start = 100.dp, end = 15.dp)
+                    ) {
+                        Text("Yes")
+                    }
+                },
+                dismissButton = {
+                    Button(onClick = { showDeleteDialog = false }) {
+                        Text("No")
+                    }
+                }
+            )
         }
     }
+
+
+
+
+
