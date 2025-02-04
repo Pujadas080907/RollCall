@@ -1,5 +1,6 @@
 package com.example.rollcall.Classroom
 
+import android.content.Context
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -25,6 +26,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -38,6 +40,7 @@ import com.example.rollcall.studentlists.StudentViewModel
 import com.example.rollcall.studentlist.StudentBottomSheet
 import com.example.rollcall.ui.theme.laila
 import com.example.rollcall.ui.theme.title
+import java.util.Calendar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -51,6 +54,9 @@ fun DegreeDetailScreen(
 ) {
     var showSheet by remember { mutableStateOf(false) }
     var editedStudent by remember { mutableStateOf<Student?>(null) }
+    var showMenu by remember { mutableStateOf(false) }
+    var selectedDate by remember { mutableStateOf("") }
+    val context = LocalContext.current
 
     //val students by studentViewModel.students.collectAsState(initial = emptyList())
     val students by studentViewModel.getStudentsByDegreeYearSection(degreeId, degreeYear, degreeSection)
@@ -93,11 +99,54 @@ fun DegreeDetailScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { /* More options */ }) {
-                        Icon(
-                            imageVector = Icons.Default.MoreVert,
-                            contentDescription = "Menu",
-                            tint = Color.White
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        IconButton(onClick = { showMenu = true }) {
+                            Icon(
+                                imageVector = Icons.Default.MoreVert,
+                                contentDescription = "Menu",
+                                tint = Color.White
+                            )
+                        }
+                        if (selectedDate.isNotEmpty()) {
+                            Text(
+                                text = selectedDate,
+                                fontSize = 12.sp,
+                                color = Color.White,
+                                fontFamily = laila,
+
+                            )
+                        }
+                    }
+                    DropdownMenu(
+                        expanded = showMenu,
+                        onDismissRequest = { showMenu = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Report") },
+                            onClick = { showMenu = false },
+                            leadingIcon = {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.report),
+                                    contentDescription = "Report",
+                                    modifier = Modifier
+                                        .size(16.dp)
+                                )
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Calendar") },
+                            onClick = {
+                                showMenu = false
+                                showDatePicker(context) { selectedDate = it }
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.calendar),
+                                    contentDescription = "Calendar",
+                                    modifier = Modifier
+                                        .size(15.dp)
+                                )
+                            }
                         )
                     }
                 },
@@ -218,6 +267,21 @@ fun DegreeDetailScreen(
             )
         }
     }
+}
+
+fun showDatePicker(context: Context, onDateSelected: (String) -> Unit) {
+    val calendar = Calendar.getInstance()
+    val datePickerDialog = android.app.DatePickerDialog(
+        context,
+        { _, year, month, day ->
+            val formattedDate = String.format("%02d/%02d/%04d", day, month + 1, year)
+            onDateSelected(formattedDate)
+        },
+        calendar.get(Calendar.YEAR),
+        calendar.get(Calendar.MONTH),
+        calendar.get(Calendar.DAY_OF_MONTH)
+    )
+    datePickerDialog.show()
 }
 
 
