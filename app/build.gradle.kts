@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.google.gms.google.services)
 }
 
 android {
@@ -49,6 +50,12 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.firebase.auth)
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
+    implementation(libs.firebase.firestore)
+    implementation(libs.firebase.database)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -56,4 +63,23 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    //navigation
+    implementation ("androidx.navigation:navigation-compose:2.7.7")
+
+    //metarial3
+    implementation ("androidx.compose.material3:material3:1.2.1")
+    //animated navigation
+    implementation ("com.google.accompanist:accompanist-navigation-animation:0.32.0")
+    implementation ("androidx.compose.runtime:runtime-livedata:1.6.0")
+
+    //google signup
+    implementation("com.google.android.gms:play-services-auth:21.0.0")
+
+    //firebase database
+    implementation ("com.google.firebase:firebase-database-ktx:20.3.1")
+
+
+
+
 }

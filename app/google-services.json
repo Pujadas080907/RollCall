@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "1014241138424",
+    "project_id": "rollcall-baf13",
+    "storage_bucket": "rollcall-baf13.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1014241138424:android:411e9f82839602ee480d0d",
+        "android_client_info": {
+          "package_name": "com.example.rollcall"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1014241138424-8ksuhbfurnhq436uj8703m8op8ktqhnc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.rollcall",
+            "certificate_hash": "429e860fe4fc9b6f08a26e7d6481fc50c0e099d5"
+          }
+        },
+        {
+          "client_id": "1014241138424-b69ibh57cdperg3ha2ag6t43ubm0fhek.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCL4PIejLTSbcm9ZTPKxsnhUhqsesQF_rI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1014241138424-b69ibh57cdperg3ha2ag6t43ubm0fhek.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
