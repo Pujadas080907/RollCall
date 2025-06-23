@@ -83,6 +83,8 @@ fun DegreeDetailPage(
     val students  = remember { mutableStateListOf<StudentData>() }
     val loading   = remember { mutableStateOf(true) }
     val query     = remember { mutableStateOf("") }
+    val studentToEdit = remember { mutableStateOf<StudentData?>(null) }
+
 
     /* initial fetch */
     LaunchedEffect(Unit) {
@@ -344,8 +346,15 @@ fun DegreeDetailPage(
                             contentPadding = PaddingValues(bottom = 100.dp)) {
                             items(filtered) { student ->
                                 StudentRow(student,
-                                    onEditClick = {},
-                                    onDeleteClick = {})
+                                    onEditClick = {
+                                        studentToEdit.value = it
+                                        fullName.value = it.fullName
+                                        enrollment.value = it.enrollment
+                                        showAddDialog.value = true
+                                    },
+                                    onDeleteClick = {
+                                        students.remove(it)
+                                    })
                             }
                         }
                     }
@@ -395,7 +404,12 @@ fun DegreeDetailPage(
         }
         /* ───────────────── Add-Student Dialog ───────────────── */
         if (showAddDialog.value) {
-            Dialog(onDismissRequest = { showAddDialog.value = false }) {
+            Dialog(onDismissRequest = {
+                showAddDialog.value = false
+                studentToEdit.value = null
+                fullName.value = ""
+                enrollment.value = ""
+            }) {
                 Surface(
                     shape = RoundedCornerShape(18.dp),
                     shadowElevation = 4.dp,
@@ -409,7 +423,7 @@ fun DegreeDetailPage(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            "Add a new Student",
+                            text = if (studentToEdit.value == null) "Add a new Student" else "Edit Student",
                             fontFamily = Lalezar,
                             fontWeight = FontWeight.Bold,
                             fontSize = 20.sp
@@ -464,68 +478,69 @@ fun DegreeDetailPage(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
+                            // Cancel button
                             Button(
-                                onClick = { showAddDialog.value = false },
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = colorResource(
-                                        R.color.prem
-                                    )
-                                ),
+                                onClick = {
+                                    showAddDialog.value = false
+                                    studentToEdit.value = null
+                                    fullName.value = ""
+                                    enrollment.value = ""
+                                },
+                                colors = ButtonDefaults.buttonColors(containerColor = colorResource(R.color.prem)),
                                 shape = RoundedCornerShape(12.dp),
                                 modifier = Modifier.width(120.dp)
                             ) {
                                 Text("Cancel", color = Color.White, fontFamily = Laila, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
                             }
-
-//                            Button(
-//                                onClick = {
-//                                    // TODO: validate & save the student
-//                                    showAddDialog.value = false
-//                                },
-//                                colors = ButtonDefaults.buttonColors(
-//                                    containerColor = colorResource(
-//                                        R.color.maya
-//                                    )
-//                                ),
-//                                shape = RoundedCornerShape(12.dp),
-//                                modifier = Modifier.width(120.dp)
-//                            ) {
-//                                Text("Add", color = Color.White, fontFamily = Laila,fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
-//                            }
                             Button(
                                 onClick = {
-                                    // ── Validate ──
                                     if (fullName.value.isBlank() || enrollment.value.isBlank()) return@Button
 
-                                    // ── Payload ──
-                                    val newStudent = StudentData(
-                                        fullName    = fullName.value.trim(),
-                                        enrollment  = enrollment.value.trim(),
-                                        classroomId = cid          // link to ClassroomData.id
-                                    )
-
-                                    // ── Save to Firestore ──
-                                    FirebaseDbHelper.addStudent(
-                                        student = newStudent,
-                                        onSuccess = {
-                                            students.add(newStudent)      // refresh list
-                                            fullName.value = ""
-                                            enrollment.value = ""
-                                            showAddDialog.value = false   // close dialog
-                                        },
-                                        onFailure = { /* TODO: show error */ }
-                                    )
+                                    if (studentToEdit.value == null) {
+                                        // ── ADD MODE ──
+                                        val newStudent = StudentData(
+                                            fullName = fullName.value.trim(),
+                                            enrollment = enrollment.value.trim(),
+                                            classroomId = cid
+                                        )
+                                        FirebaseDbHelper.addStudent(
+                                            student = newStudent,
+                                            onSuccess = {
+                                                students.add(newStudent)
+                                                showAddDialog.value = false
+                                                fullName.value = ""
+                                                enrollment.value = ""
+                                            },
+                                            onFailure = { /* TODO */ }
+                                        )
+                                    } else {
+                                        // ── EDIT MODE ──
+                                        val updatedStudent = studentToEdit.value!!.copy(
+                                            fullName = fullName.value.trim(),
+                                            enrollment = enrollment.value.trim()
+                                        )
+                                        FirebaseDbHelper.updateStudent(
+                                            student = updatedStudent,
+                                            onSuccess = {
+                                                val index = students.indexOfFirst { it.studentId == updatedStudent.studentId }
+                                                if (index != -1) students[index] = updatedStudent
+                                                showAddDialog.value = false
+                                                studentToEdit.value = null
+                                                fullName.value = ""
+                                                enrollment.value = ""
+                                            },
+                                            onFailure = { /* TODO */ }
+                                        )
+                                    }
                                 },
-                                colors  = ButtonDefaults.buttonColors(containerColor = colorResource(R.color.maya)),
-                                shape   = RoundedCornerShape(12.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = colorResource(R.color.maya)),
+                                shape = RoundedCornerShape(12.dp),
                                 modifier = Modifier.width(120.dp)
                             ) {
                                 Text(
-                                    "Add",
+                                    text = if (studentToEdit.value == null) "Add" else "Update",
                                     color = Color.White,
-                                    fontFamily = Laila,
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.SemiBold
+                                    fontFamily = Laila
                                 )
                             }
 

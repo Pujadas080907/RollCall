@@ -130,4 +130,40 @@ fun saveDegreeDetails(
             .addOnFailureListener { onFailure(it) }
     }
 
+    fun deleteStudent(
+        student: StudentData,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        if (student.studentId.isBlank()) {
+            onFailure(Exception("Invalid student ID"))
+            return
+        }
+
+        Firebase.firestore.collection("students")
+            .document(student.studentId)
+            .delete()
+            .addOnSuccessListener { onSuccess() }
+            .addOnFailureListener { onFailure(it) }
+    }
+
+    fun updateStudent(
+        student: StudentData,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        if (student.studentId.isBlank()) {
+            onFailure(Exception("Invalid student ID"))
+            return
+        }
+
+        db.collection("students")
+            .document(student.studentId)
+            .set(student)
+            .addOnSuccessListener { onSuccess() }
+            .addOnFailureListener { onFailure(it) }
+    }
+
+
+
 }
