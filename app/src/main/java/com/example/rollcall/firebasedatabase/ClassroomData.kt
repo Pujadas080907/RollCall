@@ -20,6 +20,17 @@ data class StudentData(
     val userEmail:   String = ""
 )
 
+data class AttendanceData(
+    val date: String = "",
+    val studentId: String = "",
+    val fullName: String = "",
+    val enrollment: String = "",
+    val classroomId: String = "",
+    val status: String = "",  // "P" or "A"
+    val userEmail: String = ""
+)
+
+
 
 object FirebaseDbHelper {
     private val db = Firebase.firestore
@@ -161,6 +172,52 @@ fun saveDegreeDetails(
             .document(student.studentId)
             .set(student)
             .addOnSuccessListener { onSuccess() }
+            .addOnFailureListener { onFailure(it) }
+    }
+
+    fun saveAttendance(
+        attendanceList: List<AttendanceData>,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        val user = FirebaseAuth.getInstance().currentUser
+        if (user == null) {
+            onFailure(Exception("User not logged in"))
+            return
+        }
+
+        val batch = Firebase.firestore.batch()
+        val collection = Firebase.firestore.collection("attendance")
+
+        for (attendance in attendanceList) {
+            val doc = collection.document()
+            batch.set(doc, attendance.copy(userEmail = user.email ?: ""))
+        }
+
+        batch.commit()
+            .addOnSuccessListener { onSuccess() }
+            .addOnFailureListener { onFailure(it) }
+    }
+
+    fun getAttendanceByClassroom(
+        classroomId: String,
+        onSuccess: (List<AttendanceData>) -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        val user = FirebaseAuth.getInstance().currentUser
+        if (user == null) {
+            onFailure(Exception("User not logged in"))
+            return
+        }
+
+        Firebase.firestore.collection("attendance")
+            .whereEqualTo("userEmail", user.email)
+            .whereEqualTo("classroomId", classroomId)
+            .get()
+            .addOnSuccessListener { snap ->
+                val list = snap.documents.mapNotNull { it.toObject(AttendanceData::class.java) }
+                onSuccess(list)
+            }
             .addOnFailureListener { onFailure(it) }
     }
 

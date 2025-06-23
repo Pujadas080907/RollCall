@@ -14,6 +14,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -35,12 +36,17 @@ import com.example.rollcall.ui.theme.Lalezar
 fun StudentRow(
     student: StudentData,
     onEditClick: (StudentData) -> Unit = {},
-    onDeleteClick: (StudentData) -> Unit = {}
+    onDeleteClick: (StudentData) -> Unit = {},
+    presentIds: SnapshotStateList<String>,
+    absentIds: SnapshotStateList<String>
+
+
 ) {
     val context = LocalContext.current
     var isPresent by remember { mutableStateOf(false) }
     var isAbsent by remember { mutableStateOf(false) }
     var menuOpen by remember { mutableStateOf(false) }
+
 
     // Dialog state
     val showDialog = remember { mutableStateOf(false) }
@@ -110,8 +116,16 @@ fun StudentRow(
             Checkbox(
                 checked = isPresent,
                 onCheckedChange = {
+//                    isPresent = it
+//                    if (it) isAbsent = false
                     isPresent = it
-                    if (it) isAbsent = false
+                    if (it) {
+                        isAbsent = false
+                        if (!presentIds.contains(student.studentId)) presentIds.add(student.studentId)
+                        absentIds.remove(student.studentId)
+                    } else {
+                        presentIds.remove(student.studentId)
+                    }
                 },
                 colors = CheckboxDefaults.colors(
                     checkedColor = Color.White,
@@ -145,6 +159,11 @@ fun StudentRow(
                         tint = Color.Red,
                         modifier = Modifier.size(14.dp)
                     )
+                    presentIds.remove(student.studentId)
+                    if (!absentIds.contains(student.studentId)) absentIds.add(student.studentId)
+                } else {
+                    absentIds.remove(student.studentId)
+
                 }
             }
 

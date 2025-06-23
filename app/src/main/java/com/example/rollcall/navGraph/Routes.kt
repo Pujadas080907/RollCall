@@ -17,4 +17,7 @@ sealed class Routes(val routes: String) {
     object degreeDetailPage: Routes(
         "degdetail/{degree}/{year}/{section}/{cid}"
     )
+
+    //full report page
+    object fullReportPage : Routes("fullreportpage")
 }

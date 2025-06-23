@@ -1,5 +1,8 @@
 package com.example.rollcall.degreedetail
 
+import android.app.DatePickerDialog
+import android.icu.util.Calendar
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -64,7 +67,12 @@ import com.example.rollcall.studentdata.StudentRow
 import com.example.rollcall.ui.theme.topbarfont
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.TextField
+import androidx.compose.ui.platform.LocalContext
+import com.example.rollcall.firebasedatabase.AttendanceData
+import com.example.rollcall.firebasedatabase.ClassroomData
 import com.example.rollcall.firebasedatabase.StudentData
+import com.google.firebase.auth.FirebaseAuth
+import java.net.URLEncoder
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -84,6 +92,21 @@ fun DegreeDetailPage(
     val loading   = remember { mutableStateOf(true) }
     val query     = remember { mutableStateOf("") }
     val studentToEdit = remember { mutableStateOf<StudentData?>(null) }
+
+    val context = LocalContext.current
+    val selectedDate = remember { mutableStateOf("") }
+
+// REMOVE these lines from inside StudentRow:
+    val presentIds = remember { mutableStateListOf<String>() }
+    val absentIds = remember { mutableStateListOf<String>() }
+    val classroom = ClassroomData( // new add
+        degree = degree,
+        year = year,
+        section = section,
+        id = cid
+    )
+
+
 
 
     /* initial fetch */
@@ -177,7 +200,19 @@ fun DegreeDetailPage(
                                             Text("See Report", fontSize = 15.sp, fontFamily = Laila)
                                         }
                                     },
-                                    onClick = { /* TODO */ }
+                                    onClick = {
+                                        menuExpanded = false
+                                        if (selectedDate.value.isNotEmpty()) {
+                                            val encodedDate = URLEncoder.encode(selectedDate.value, "UTF-8")
+                                            val route = "fullreportpage/${classroom.degree}/${classroom.year}/${classroom.section}/${classroom.id}/$encodedDate"
+                                            navController.navigate(route)
+
+                                        } else {
+                                            Toast.makeText(context, "Please select a date", Toast.LENGTH_SHORT).show()
+                                        }
+
+
+                                    }
                                 )
                                 DropdownMenuItem(
                                     text = {
@@ -211,7 +246,18 @@ fun DegreeDetailPage(
 
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.clickable { /* TODO open date picker */ }
+                            modifier = Modifier.clickable {
+                                val calendar = Calendar.getInstance()
+                                DatePickerDialog(
+                                    context,
+                                    { _, year, month, dayOfMonth ->
+                                        selectedDate.value = "%02d/%02d/%04d".format(dayOfMonth, month + 1, year)
+                                    },
+                                    calendar.get(Calendar.YEAR),
+                                    calendar.get(Calendar.MONTH),
+                                    calendar.get(Calendar.DAY_OF_MONTH)
+                                ).show()
+                            }
                         ) {
                             Icon(
                                 painter = painterResource(R.drawable.yearicon),
@@ -221,12 +267,13 @@ fun DegreeDetailPage(
                             )
                             Spacer(Modifier.width(4.dp))
                             Text(
-                                text = "Choose Date",
+                                text = if (selectedDate.value.isNotEmpty()) selectedDate.value else "Choose Date",
                                 color = Color.White,
                                 fontSize = 14.sp,
                                 fontFamily = Laila
                             )
                         }
+
                     }
                 }
             }
@@ -354,7 +401,11 @@ fun DegreeDetailPage(
                                     },
                                     onDeleteClick = {
                                         students.remove(it)
-                                    })
+                                    },
+                                    presentIds = presentIds,
+                                    absentIds = absentIds
+
+                                    )
                             }
                         }
                     }
@@ -372,7 +423,45 @@ fun DegreeDetailPage(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Button(
-                    onClick = { /* TODO: handle Save */ },
+                    onClick = {
+                        if (selectedDate.value.isEmpty()) {
+                            Toast.makeText(context, "Please choose a date first", Toast.LENGTH_SHORT).show()
+                            return@Button
+                        }
+
+                        val attendanceList = students.map { student ->
+                            val status = when {
+                                presentIds.contains(student.studentId) -> "P"
+                                absentIds.contains(student.studentId) -> "A"
+                                else -> ""
+                            }
+
+                            AttendanceData( // new add
+                                classroomId = cid,
+                                studentId = student.studentId,
+                                date = selectedDate.value,
+                                status = status,
+                                fullName = student.fullName,
+                                enrollment = student.enrollment,
+                                userEmail = FirebaseAuth.getInstance().currentUser?.email ?: ""
+                            )
+                        }.filter { it.status.isNotBlank() }
+
+                        if (attendanceList.isEmpty()) {
+                            Toast.makeText(context, "Mark attendance first", Toast.LENGTH_SHORT).show()
+                            return@Button
+                        }
+
+                        FirebaseDbHelper.saveAttendance(
+                            attendanceList = attendanceList,
+                            onSuccess = {
+                                Toast.makeText(context, "Attendance saved", Toast.LENGTH_SHORT).show()
+                            },
+                            onFailure = {
+                                Toast.makeText(context, "Error: ${it.message}", Toast.LENGTH_SHORT).show()
+                            }
+                        )
+                    },
                     colors = ButtonDefaults.buttonColors(containerColor = colorResource(R.color.prem)),
                     shape = RoundedCornerShape(12.dp)
                 ) {
