@@ -60,6 +60,8 @@ import kotlin.time.Duration.Companion.seconds
 @Composable
 fun ClassroomPage(navController: NavController,authViewModel: AuthViewModel) {
     val showBottomSheet = remember { mutableStateOf(false) }
+    val isEditMode        = remember { mutableStateOf(false) }
+    val editingClassroom  = remember { mutableStateOf<ClassroomData?>(null) }
 
     val authState = authViewModel.authState.observeAsState()
 
@@ -107,7 +109,11 @@ fun ClassroomPage(navController: NavController,authViewModel: AuthViewModel) {
 
     if (showBottomSheet.value) {
         ModalBottomSheet(
-            onDismissRequest = { showBottomSheet.value = false },
+            onDismissRequest = {
+                showBottomSheet.value = false
+                isEditMode.value = false
+                editingClassroom.value = null
+            },
             containerColor = colorResource(R.color.maya),
             shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
         ) {
@@ -120,7 +126,7 @@ fun ClassroomPage(navController: NavController,authViewModel: AuthViewModel) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Add new a batch",
+                    text = if (isEditMode.value) "Edit Batch" else "Add new a batch",
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp,
                     fontFamily = Lalezar
@@ -270,7 +276,11 @@ fun ClassroomPage(navController: NavController,authViewModel: AuthViewModel) {
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Button(
-                        onClick = { showBottomSheet.value = false },
+                        onClick = {
+                            showBottomSheet.value = false
+                            isEditMode.value = false
+                            editingClassroom.value = null
+                        },
                         modifier = Modifier
                             .width(95.dp)
                             .height(40.dp),
@@ -290,31 +300,62 @@ fun ClassroomPage(navController: NavController,authViewModel: AuthViewModel) {
                                 selectedSec.value != "Choose Sec" &&
                                 !userEmail.isNullOrBlank()
                             ) {
-                                val classroom = ClassroomData(
+                                val payload = ClassroomData(
                                     degree = degree.value,
                                     year = selectedYear.value,
                                     section = selectedSec.value,
-                                    userEmail = userEmail
+                                    userEmail = userEmail,
+                                    id = editingClassroom.value?.id ?: ""
                                 )
-                                FirebaseDbHelper.saveDegreeDetails(
-                                    classroom,
-                                    onSuccess = {
-                                        showBottomSheet.value = false
-                                        classrooms.add(it)
-                                        Toast.makeText(
-                                            context,
-                                            "Classroom added",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    },
-                                    onFailure = {
-                                        Toast.makeText(
-                                            context,
-                                            "Error: ${it.message}",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    }
-                                )
+
+                                if (isEditMode.value && editingClassroom.value != null) {
+                                    FirebaseDbHelper.updateClassroomDetails(
+                                        payload,
+                                        onSuccess = {
+                                            classrooms.indexOfFirst { it.id == payload.id }
+                                                .takeIf { it != -1 }
+                                                ?.let { idx ->
+                                                    classrooms[idx] =
+                                                        payload
+                                                }
+                                            Toast.makeText(
+                                                context,
+                                                "Classroom updated",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                            showBottomSheet.value = false
+                                            isEditMode.value = false
+                                            editingClassroom.value = null
+                                        },
+                                        onFailure = {
+                                            Toast.makeText(
+                                                context,
+                                                "Update failed: ${it.message}",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                    )
+                                } else {
+                                    FirebaseDbHelper.saveDegreeDetails(
+                                        payload,
+                                        onSuccess = {
+                                            classrooms.add(it)
+                                            Toast.makeText(
+                                                context,
+                                                "Classroom added",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                            showBottomSheet.value = false
+                                        },
+                                        onFailure = {
+                                            Toast.makeText(
+                                                context,
+                                                "Error: ${it.message}",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                    )
+                                }
                             } else {
                                 Toast.makeText(
                                     context,
@@ -323,17 +364,18 @@ fun ClassroomPage(navController: NavController,authViewModel: AuthViewModel) {
                                 ).show()
                             }
                         },
-                        modifier = Modifier
-                            .width(95.dp)
-                            .height(40.dp),
+                        modifier = Modifier.width(95.dp).height(40.dp),
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = colorResource(R.color.prem))
                     ) {
-                        Text("Add", color = Color.White, fontFamily = Laila)
+                        Text(
+                            if (isEditMode.value) "Update" else "Add",
+                            color = Color.White,
+                            fontFamily = Laila
+                        )
                     }
                 }
-
-                Spacer(modifier = Modifier.height(80.dp))
+                Spacer(Modifier.height(80.dp))
             }
         }
     }
@@ -379,6 +421,8 @@ fun ClassroomPage(navController: NavController,authViewModel: AuthViewModel) {
                     degree.value = ""
                     selectedYear.value = "Choose Year"
                     selectedSec.value = "Choose Sec"
+                    showBottomSheet.value = true
+                    editingClassroom.value = null
                     showBottomSheet.value = true
                 },
                 containerColor = colorResource(R.color.prem),
@@ -519,7 +563,14 @@ fun ClassroomPage(navController: NavController,authViewModel: AuthViewModel) {
                             items(filteredClassrooms) { classroom ->
                                 ClassroomCard(
                                     classroom,
-                                    onEditClick = { /* TODO */ },
+                                    onEditClick = {selected ->
+                                    degree.value = selected.degree
+                                        selectedYear.value = selected.year
+                                        selectedSec.value = selected.section
+                                        editingClassroom.value = selected
+                                        isEditMode.value = true
+                                        showBottomSheet.value = true
+                                    },
                                     onDeleteClick = { selected ->
                                         classroomToDelete.value = selected
                                         showDialog.value = true

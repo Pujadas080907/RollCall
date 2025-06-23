@@ -73,4 +73,20 @@ fun saveDegreeDetails(
             .addOnFailureListener { onFailure(it) }
     }
 
+    fun updateClassroomDetails(
+        classroom: ClassroomData,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        if (classroom.id.isBlank()) {
+            onFailure(Exception("Invalid classroom ID"))
+            return
+        }
+        db.collection("classrooms")
+            .document(classroom.id)
+            .set(classroom)
+            .addOnSuccessListener { onSuccess() }
+            .addOnFailureListener { onFailure(it) }
+    }
+
 }
