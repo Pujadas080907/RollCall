@@ -11,14 +11,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.rollcall.authentication.AuthViewModel
 import com.example.rollcall.authentication.LoginPage
 import com.example.rollcall.authentication.SignUpPage
 import com.example.rollcall.classroom.ClassroomPage
 import com.example.rollcall.monthview.MonthViewPage
 import com.example.rollcall.authentication.AuthCheckPage
+import com.example.rollcall.degreedetail.DegreeDetailPage
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 
 @OptIn(ExperimentalAnimationApi::class)
@@ -66,6 +69,21 @@ fun SetNavGraph(authViewModel: AuthViewModel) {
 
         composable(route = Routes.monthViewPage.routes) {
             MonthViewPage()
+        }
+        composable(                                                     // new added
+            route = Routes.degreeDetailPage.routes,                     // new added
+            arguments = listOf(                                         // new added
+                navArgument("degree")  { type = NavType.StringType },   // new added
+                navArgument("year")    { type = NavType.StringType },   // new added
+                navArgument("section") { type = NavType.StringType },
+                navArgument("cid")     { type = NavType.StringType } // new added
+            )                                                           // new added
+        ) { backStackEntry ->                                           // new added
+            val degree  = backStackEntry.arguments?.getString("degree") ?: ""   // new added
+            val year    = backStackEntry.arguments?.getString("year") ?: ""     // new added
+            val section = backStackEntry.arguments?.getString("section") ?: ""
+            val cid      = backStackEntry.arguments?.getString("cid") ?: ""
+            DegreeDetailPage(navController, degree, year, section,cid)
         }
     }
 }

@@ -12,6 +12,14 @@ data class ClassroomData(
     val id: String = "",
     val userEmail: String = ""
 )
+data class StudentData(
+    val studentId:   String = "",
+    val fullName:    String = "",
+    val enrollment:  String = "",
+    val classroomId: String = "",
+    val userEmail:   String = ""
+)
+
 
 object FirebaseDbHelper {
     private val db = Firebase.firestore
@@ -46,7 +54,7 @@ fun saveDegreeDetails(
         }
 
         db.collection("classrooms")
-            .whereEqualTo("userEmail", user.email) // fetch only current user's data
+            .whereEqualTo("userEmail", user.email)
             .get()
             .addOnSuccessListener { result ->
                 val list = result.documents.mapNotNull { it.toObject(ClassroomData::class.java) }
@@ -86,6 +94,39 @@ fun saveDegreeDetails(
             .document(classroom.id)
             .set(classroom)
             .addOnSuccessListener { onSuccess() }
+            .addOnFailureListener { onFailure(it) }
+    }
+
+    fun addStudent(
+        student: StudentData,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        val user = FirebaseAuth.getInstance().currentUser
+        if (user == null) { onFailure(Exception("User not logged in")); return }
+
+        val doc = db.collection("students").document()
+        val s   = student.copy(studentId = doc.id, userEmail = user.email ?: "")
+
+        doc.set(s).addOnSuccessListener { onSuccess() }
+            .addOnFailureListener { onFailure(it) }
+    }
+
+    fun getStudentsByClassroom(
+        classroomId: String,
+        onSuccess: (List<StudentData>) -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        val user = FirebaseAuth.getInstance().currentUser
+        if (user == null) { onFailure(Exception("User not logged in")); return }
+
+        db.collection("students")
+            .whereEqualTo("userEmail", user.email)
+            .whereEqualTo("classroomId", classroomId)
+            .get()
+            .addOnSuccessListener { snap ->
+                onSuccess(snap.documents.mapNotNull { it.toObject(StudentData::class.java) })
+            }
             .addOnFailureListener { onFailure(it) }
     }
 

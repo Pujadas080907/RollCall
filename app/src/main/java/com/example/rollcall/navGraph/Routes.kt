@@ -12,4 +12,9 @@ sealed class Routes(val routes: String) {
 
 //    Month view
     object monthViewPage : Routes("monthviewpage")
+
+    //degree detail page
+    object degreeDetailPage: Routes(
+        "degdetail/{degree}/{year}/{section}/{cid}"
+    )
 }
