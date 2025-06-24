@@ -141,22 +141,40 @@ fun saveDegreeDetails(
             .addOnFailureListener { onFailure(it) }
     }
 
-    fun deleteStudent(
-        student: StudentData,
-        onSuccess: () -> Unit,
-        onFailure: (Exception) -> Unit
-    ) {
-        if (student.studentId.isBlank()) {
-            onFailure(Exception("Invalid student ID"))
-            return
-        }
-
-        Firebase.firestore.collection("students")
-            .document(student.studentId)
-            .delete()
-            .addOnSuccessListener { onSuccess() }
-            .addOnFailureListener { onFailure(it) }
+fun deleteStudent(
+    student: StudentData,
+    onSuccess: () -> Unit,
+    onFailure: (Exception) -> Unit
+) {
+    if (student.studentId.isBlank()) {
+        onFailure(Exception("Invalid student ID"))
+        return
     }
+
+    val db = Firebase.firestore
+    val batch = db.batch()
+
+    // Reference to student document
+    val studentRef = db.collection("students").document(student.studentId)
+    batch.delete(studentRef)
+
+    // Query and delete all related attendance records
+    db.collection("attendance")
+        .whereEqualTo("studentId", student.studentId)
+        .get()
+        .addOnSuccessListener { snapshot ->
+            for (doc in snapshot.documents) {
+                batch.delete(doc.reference)
+            }
+
+            // Commit all deletions
+            batch.commit()
+                .addOnSuccessListener { onSuccess() }
+                .addOnFailureListener { onFailure(it) }
+        }
+        .addOnFailureListener { onFailure(it) }
+}
+
 
     fun updateStudent(
         student: StudentData,

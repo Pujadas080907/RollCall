@@ -622,12 +622,22 @@ fun DegreeDetailPage(
                                         FirebaseDbHelper.addStudent(
                                             student = newStudent,
                                             onSuccess = {
-                                                students.add(newStudent)
+                                                FirebaseDbHelper.getStudentsByClassroom(
+                                                    classroomId = cid,
+                                                    onSuccess = { latestStudents ->
+                                                        students.clear()
+                                                        students.addAll(latestStudents)
+                                                    },
+                                                    onFailure = {
+                                                        Toast.makeText(context, "Failed to refresh student list", Toast.LENGTH_SHORT).show()
+                                                    }
+                                                )
+//                                                students.add(newStudent)
                                                 showAddDialog.value = false
                                                 fullName.value = ""
                                                 enrollment.value = ""
                                             },
-                                            onFailure = { /* TODO */ }
+                                            onFailure = {  Toast.makeText(context, "Failed to add student", Toast.LENGTH_SHORT).show()}
                                         )
                                     } else {
                                         // ── EDIT MODE ──
@@ -645,7 +655,7 @@ fun DegreeDetailPage(
                                                 fullName.value = ""
                                                 enrollment.value = ""
                                             },
-                                            onFailure = { /* TODO */ }
+                                            onFailure = { Toast.makeText(context, "Failed to update student", Toast.LENGTH_SHORT).show() }
                                         )
                                     }
                                 },
