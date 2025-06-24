@@ -113,7 +113,7 @@ fun SetNavGraph(authViewModel: AuthViewModel) {
             FullReportPage(
                 navController = navController,
                 classroom = classroom,
-                selectedDate = selectedDate
+                initialDate = selectedDate
             )
         }
 

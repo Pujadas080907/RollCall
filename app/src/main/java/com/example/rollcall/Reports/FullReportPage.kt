@@ -3,6 +3,7 @@ package com.example.rollcall.Reports
 
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable // ✅ NEW: For arrow click
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -35,15 +36,34 @@ import java.util.*
 fun FullReportPage(
     navController: NavController,
     classroom: ClassroomData,
-    selectedDate: String
+    initialDate: String // ✅ renamed from `selectedDate` to `initialDate`
 ) {
     val context = LocalContext.current
     val attendanceList = remember { mutableStateListOf<AttendanceData>() }
     val isLoading = remember { mutableStateOf(true) }
 
+    // ✅ NEW: Make date changeable with arrow buttons
+    val selectedDate = remember { mutableStateOf(initialDate) }
 
+    // ✅ NEW: Date helpers
+    fun getPreviousDate(dateStr: String): String {
+        val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+        val calendar = Calendar.getInstance()
+        calendar.time = sdf.parse(dateStr)!!
+        calendar.add(Calendar.DATE, -1)
+        return sdf.format(calendar.time)
+    }
 
-    LaunchedEffect(Unit) {
+    fun getNextDate(dateStr: String): String {
+        val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+        val calendar = Calendar.getInstance()
+        calendar.time = sdf.parse(dateStr)!!
+        calendar.add(Calendar.DATE, 1)
+        return sdf.format(calendar.time)
+    }
+
+    // ✅ NEW: Reload attendance when date changes
+    LaunchedEffect(selectedDate.value) {
         isLoading.value = true
 
         FirebaseDbHelper.getAttendanceByClassroom(
@@ -81,10 +101,10 @@ fun FullReportPage(
         )
     }
 
-
-    val monthYear = remember(selectedDate) {
+    // Format for top bar
+    val monthYear = remember(selectedDate.value) {
         try {
-            val date = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).parse(selectedDate)
+            val date = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).parse(selectedDate.value)
             SimpleDateFormat("MMMM - yyyy", Locale.getDefault()).format(date!!)
         } catch (e: Exception) {
             "Attendance Report"
@@ -96,62 +116,36 @@ fun FullReportPage(
             Surface(
                 color = colorResource(id = R.color.prem),
                 tonalElevation = 4.dp,
-                modifier = Modifier
-                    .defaultMinSize(minHeight = 50.dp)
+                modifier = Modifier.defaultMinSize(minHeight = 50.dp)
             ) {
                 Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .statusBarsPadding()
+                    modifier = Modifier.fillMaxWidth().statusBarsPadding()
                 ) {
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(30.dp),
+                        modifier = Modifier.fillMaxWidth().height(30.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         IconButton(onClick = { navController.popBackStack() }) {
-                            Icon(
-                                Icons.Default.ArrowBack,
-                                contentDescription = "Back",
-                                tint = Color.White
-                            )
+                            Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
                         }
 
                         Box(
                             modifier = Modifier.weight(1f),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text(
-                                text = monthYear,
-                                color = Color.White,
-                                fontSize = 22.sp,
-                                fontFamily = Lalezar
-                            )
+                            Text(text = monthYear, color = Color.White, fontSize = 22.sp, fontFamily = Lalezar)
                         }
 
                         Spacer(modifier = Modifier.size(48.dp))
                     }
 
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 6.dp),
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text(
-                            text = classroom.degree,
-                            color = Color.White,
-                            fontSize = 15.sp,
-                            fontFamily = Laila
-                        )
-                        Text(
-                            text = "${classroom.year} / Sec: ${classroom.section}",
-                            color = Color.White,
-                            fontSize = 15.sp,
-                            fontFamily = Laila
-                        )
+                        Text(text = classroom.degree, color = Color.White, fontSize = 15.sp, fontFamily = Laila)
+                        Text(text = "${classroom.year} / Sec: ${classroom.section}", color = Color.White, fontSize = 15.sp, fontFamily = Laila)
                     }
                 }
             }
@@ -168,29 +162,33 @@ fun FullReportPage(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-
+                // ✅ NEW: Clickable back arrow to move to previous date
                 Icon(
                     painter = painterResource(R.drawable.backarrow), contentDescription = null,
                     modifier = Modifier
                         .size(22.dp)
                         .padding(start = 5.dp)
+                        .clickable {
+                            selectedDate.value = getPreviousDate(selectedDate.value)
+                        }
                 )
 
-                Text(selectedDate, fontFamily = Laila, fontWeight = FontWeight.Bold)
+                Text(selectedDate.value, fontFamily = Laila, fontWeight = FontWeight.Bold)
 
+                // ✅ NEW: Clickable forward arrow to move to next date
                 Icon(
                     painter = painterResource(R.drawable.forwardarrow), contentDescription = null,
                     modifier = Modifier
                         .size(23.dp)
                         .padding(end = 5.dp)
+                        .clickable {
+                            selectedDate.value = getNextDate(selectedDate.value)
+                        }
                 )
             }
 
             if (isLoading.value) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         CircularProgressIndicator(color = colorResource(R.color.maya))
                         Spacer(modifier = Modifier.height(20.dp))
@@ -203,33 +201,58 @@ fun FullReportPage(
                     }
                 }
             } else {
-                LazyColumn {
-                    items(attendanceList.filter { it.date == selectedDate }) { record ->
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 4.dp, bottom = 4.dp)
-                                .background(
-                                    color = if (record.status == "P") colorResource(R.color.presentcolor) else colorResource(
-                                        R.color.absentcolor
-                                    ),
-                                    shape = RoundedCornerShape(0.dp)
-                                )
-                                .padding(12.dp)
-                        ) {
-                            Row(
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                modifier = Modifier.fillMaxWidth()
+                // ✅ NEW: Filtered attendance for selected date
+                val filteredRecords = attendanceList.filter { it.date == selectedDate.value }
+
+                if (filteredRecords.isEmpty()) {
+                    // ✅ NEW: No attendance fallback
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(top = 32.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Icon(
+                                painter = painterResource(R.drawable.nomatch),
+                                contentDescription = "No class",
+                                tint = Color.Unspecified,
+                                modifier = Modifier
+                                    .size(180.dp)
+                                    .padding(bottom = 12.dp)
+                            )
+                            Text(
+                                text = "Class was not conducted on this day ❌",
+                                fontSize = 16.sp,
+                                color = Color.Black,
+                                fontFamily = Laila,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+                    }
+                } else {
+                    LazyColumn {
+                        items(filteredRecords) { record ->
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 4.dp, bottom = 4.dp)
+                                    .background(
+                                        color = if (record.status == "P")
+                                            colorResource(R.color.presentcolor)
+                                        else
+                                            colorResource(R.color.absentcolor),
+                                        shape = RoundedCornerShape(0.dp)
+                                    )
+                                    .padding(12.dp)
                             ) {
-                                Text(
-                                    "${record.fullName} | ${record.enrollment}",
-                                    fontFamily = Laila
-                                )
-                                Text(
-                                    record.status,
-                                    fontWeight = FontWeight.Bold,
-                                    fontFamily = Laila
-                                )
+                                Row(
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Text("${record.fullName} | ${record.enrollment}", fontFamily = Laila)
+                                    Text(record.status, fontWeight = FontWeight.Bold, fontFamily = Laila)
+                                }
                             }
                         }
                     }
