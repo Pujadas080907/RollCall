@@ -1,4 +1,5 @@
 
+
 @file:OptIn(ExperimentalFoundationApi::class)
 
 package com.example.rollcall.studentdata
@@ -38,17 +39,19 @@ fun StudentRow(
     onEditClick: (StudentData) -> Unit = {},
     onDeleteClick: (StudentData) -> Unit = {},
     presentIds: SnapshotStateList<String>,
-    absentIds: SnapshotStateList<String>
-
-
+    absentIds: SnapshotStateList<String>,
+    selectedDate: String
 ) {
     val context = LocalContext.current
-    var isPresent by remember { mutableStateOf(false) }
-    var isAbsent by remember { mutableStateOf(false) }
+
+    val isPresent = remember { derivedStateOf { presentIds.contains(student.studentId) } }
+    val isAbsent = remember { derivedStateOf { absentIds.contains(student.studentId) } }
+
+    val isAttendanceTaken = selectedDate.isNotEmpty() &&
+            (presentIds.contains(student.studentId) || absentIds.contains(student.studentId))
+
     var menuOpen by remember { mutableStateOf(false) }
 
-
-    // Dialog state
     val showDialog = remember { mutableStateOf(false) }
     val studentToDelete = remember { mutableStateOf<StudentData?>(null) }
 
@@ -114,19 +117,18 @@ fun StudentRow(
             Text("P", color = Color.White, fontFamily = Laila)
 
             Checkbox(
-                checked = isPresent,
+                checked = isPresent.value,
                 onCheckedChange = {
-//                    isPresent = it
-//                    if (it) isAbsent = false
-                    isPresent = it
-                    if (it) {
-                        isAbsent = false
-                        if (!presentIds.contains(student.studentId)) presentIds.add(student.studentId)
-                        absentIds.remove(student.studentId)
-                    } else {
-                        presentIds.remove(student.studentId)
+                    if (!isAttendanceTaken) {
+                        if (it) {
+                            if (!presentIds.contains(student.studentId)) presentIds.add(student.studentId)
+                            absentIds.remove(student.studentId)
+                        } else {
+                            presentIds.remove(student.studentId)
+                        }
                     }
                 },
+                enabled = !isAttendanceTaken,
                 colors = CheckboxDefaults.colors(
                     checkedColor = Color.White,
                     uncheckedColor = Color.White,
@@ -142,34 +144,34 @@ fun StudentRow(
                 modifier = Modifier
                     .size(20.dp)
                     .background(
-                        color = if (isAbsent) Color.White else Color.Transparent,
+                        color = if (isAbsent.value) Color.White else Color.Transparent,
                         shape = RoundedCornerShape(2.dp)
                     )
                     .border(2.dp, Color.White, RoundedCornerShape(2.dp))
-                    .clickable {
-                        isAbsent = !isAbsent
-                        if (isAbsent) isPresent = false
+                    .clickable(enabled = !isAttendanceTaken) {
+                        if (!isAttendanceTaken) {
+                            if (!isAbsent.value) {
+                                if (!absentIds.contains(student.studentId)) absentIds.add(student.studentId)
+                                presentIds.remove(student.studentId)
+                            } else {
+                                absentIds.remove(student.studentId)
+                            }
+                        }
                     },
                 contentAlignment = Alignment.Center
             ) {
-                if (isAbsent) {
+                if (isAbsent.value) {
                     Icon(
                         painter = painterResource(R.drawable.cross),
                         contentDescription = "absent",
                         tint = Color.Red,
                         modifier = Modifier.size(14.dp)
                     )
-                    presentIds.remove(student.studentId)
-                    if (!absentIds.contains(student.studentId)) absentIds.add(student.studentId)
-                } else {
-                    absentIds.remove(student.studentId)
-
                 }
             }
 
             Spacer(Modifier.width(8.dp))
 
-            // Long-press menu
             Box(
                 modifier = Modifier
                     .padding(start = 10.dp)
@@ -221,7 +223,6 @@ fun StudentRow(
         }
     }
 
-    // Delete Confirmation Dialog
     if (showDialog.value && studentToDelete.value != null) {
         AlertDialog(
             onDismissRequest = { showDialog.value = false },

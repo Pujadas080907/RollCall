@@ -1,3 +1,4 @@
+
 package com.example.rollcall.Reports
 
 import android.widget.Toast
@@ -8,7 +9,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -38,22 +39,49 @@ fun FullReportPage(
 ) {
     val context = LocalContext.current
     val attendanceList = remember { mutableStateListOf<AttendanceData>() }
+    val isLoading = remember { mutableStateOf(true) }
 
-    // Load attendance from Firebase
+
+
     LaunchedEffect(Unit) {
+        isLoading.value = true
+
         FirebaseDbHelper.getAttendanceByClassroom(
             classroomId = classroom.id,
-            onSuccess = {
-                attendanceList.clear()
-                attendanceList.addAll(it)
+            onSuccess = { attendanceData ->
+
+                FirebaseDbHelper.getStudentsByClassroom(
+                    classroomId = classroom.id,
+                    onSuccess = { currentStudents ->
+                        val studentMap = currentStudents.associateBy { it.studentId }
+
+                        val updatedAttendance = attendanceData.mapNotNull { att ->
+                            studentMap[att.studentId]?.let { student ->
+                                att.copy(
+                                    fullName = student.fullName,
+                                    enrollment = student.enrollment
+                                )
+                            }
+                        }
+
+                        attendanceList.clear()
+                        attendanceList.addAll(updatedAttendance)
+                        isLoading.value = false
+                    },
+                    onFailure = {
+                        Toast.makeText(context, "Failed to load students", Toast.LENGTH_SHORT).show()
+                        isLoading.value = false
+                    }
+                )
             },
             onFailure = {
                 Toast.makeText(context, "Failed to load attendance", Toast.LENGTH_SHORT).show()
+                isLoading.value = false
             }
         )
     }
 
-    // 🔤 Convert "25/01/2025" → "January - 2025"
+
     val monthYear = remember(selectedDate) {
         try {
             val date = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).parse(selectedDate)
@@ -63,61 +91,147 @@ fun FullReportPage(
         }
     }
 
-    Column {
-        TopAppBar(
-            title = {
-                Text(monthYear, fontFamily = Lalezar, color = Color.White)
-            },
-            navigationIcon = {
-                IconButton(onClick = { navController.popBackStack() }) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
-                }
-            },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = colorResource(R.color.prem))
-        )
-
-        Text(
-            text = "${classroom.degree}   ${classroom.year} / Sec: ${classroom.section}",
-            color = Color.White,
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(colorResource(R.color.prem))
-                .padding(horizontal = 16.dp),
-            fontFamily = Laila,
-            fontSize = 14.sp
-        )
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp)
-                .background(Color.LightGray, RoundedCornerShape(8.dp)),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(Icons.Default.ArrowBack, contentDescription = null)
-            Text(selectedDate, fontFamily = Laila, fontWeight = FontWeight.Bold)
-            Icon(Icons.Default.ArrowForward, contentDescription = null)
-        }
-
-        LazyColumn {
-            items(attendanceList.filter { it.date == selectedDate }) { record ->
-                Box(
+    Scaffold(
+        topBar = {
+            Surface(
+                color = colorResource(id = R.color.prem),
+                tonalElevation = 4.dp,
+                modifier = Modifier
+                    .defaultMinSize(minHeight = 50.dp)
+            ) {
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(4.dp)
-                        .background(
-                            color = if (record.status == "P") Color(0xFF81C784) else Color(0xFFEF9A9A),
-                            shape = RoundedCornerShape(4.dp)
-                        )
-                        .padding(12.dp)
+                        .statusBarsPadding()
                 ) {
                     Row(
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(30.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("${record.fullName} | ${record.enrollment}", fontFamily = Laila)
-                        Text(record.status, fontWeight = FontWeight.Bold, fontFamily = Laila)
+                        IconButton(onClick = { navController.popBackStack() }) {
+                            Icon(
+                                Icons.Default.ArrowBack,
+                                contentDescription = "Back",
+                                tint = Color.White
+                            )
+                        }
+
+                        Box(
+                            modifier = Modifier.weight(1f),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = monthYear,
+                                color = Color.White,
+                                fontSize = 22.sp,
+                                fontFamily = Lalezar
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.size(48.dp))
+                    }
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = classroom.degree,
+                            color = Color.White,
+                            fontSize = 15.sp,
+                            fontFamily = Laila
+                        )
+                        Text(
+                            text = "${classroom.year} / Sec: ${classroom.section}",
+                            color = Color.White,
+                            fontSize = 15.sp,
+                            fontFamily = Laila
+                        )
+                    }
+                }
+            }
+        },
+        containerColor = Color.White
+    ) { innerPadding ->
+        Column(modifier = Modifier.padding(innerPadding)) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp)
+                    .height(45.dp)
+                    .background(Color.LightGray, RoundedCornerShape(8.dp)),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
+                Icon(
+                    painter = painterResource(R.drawable.backarrow), contentDescription = null,
+                    modifier = Modifier
+                        .size(22.dp)
+                        .padding(start = 5.dp)
+                )
+
+                Text(selectedDate, fontFamily = Laila, fontWeight = FontWeight.Bold)
+
+                Icon(
+                    painter = painterResource(R.drawable.forwardarrow), contentDescription = null,
+                    modifier = Modifier
+                        .size(23.dp)
+                        .padding(end = 5.dp)
+                )
+            }
+
+            if (isLoading.value) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        CircularProgressIndicator(color = colorResource(R.color.maya))
+                        Spacer(modifier = Modifier.height(20.dp))
+                        Text(
+                            text = "Reports are fetching...⏳",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Medium,
+                            fontFamily = Laila
+                        )
+                    }
+                }
+            } else {
+                LazyColumn {
+                    items(attendanceList.filter { it.date == selectedDate }) { record ->
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 4.dp, bottom = 4.dp)
+                                .background(
+                                    color = if (record.status == "P") colorResource(R.color.presentcolor) else colorResource(
+                                        R.color.absentcolor
+                                    ),
+                                    shape = RoundedCornerShape(0.dp)
+                                )
+                                .padding(12.dp)
+                        ) {
+                            Row(
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text(
+                                    "${record.fullName} | ${record.enrollment}",
+                                    fontFamily = Laila
+                                )
+                                Text(
+                                    record.status,
+                                    fontWeight = FontWeight.Bold,
+                                    fontFamily = Laila
+                                )
+                            }
+                        }
                     }
                 }
             }

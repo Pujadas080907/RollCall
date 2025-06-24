@@ -99,7 +99,7 @@ fun DegreeDetailPage(
 // REMOVE these lines from inside StudentRow:
     val presentIds = remember { mutableStateListOf<String>() }
     val absentIds = remember { mutableStateListOf<String>() }
-    val classroom = ClassroomData( // new add
+    val classroom = ClassroomData(
         degree = degree,
         year = year,
         section = section,
@@ -191,7 +191,7 @@ fun DegreeDetailPage(
                                     text = {
                                         Row(verticalAlignment = Alignment.CenterVertically) {
                                             Icon(
-                                                painterResource(R.drawable.img),
+                                                painterResource(R.drawable.seereporticon),
                                                 contentDescription = null,
                                                 Modifier.size(20.dp),
                                                 tint = Color.Unspecified
@@ -252,6 +252,23 @@ fun DegreeDetailPage(
                                     context,
                                     { _, year, month, dayOfMonth ->
                                         selectedDate.value = "%02d/%02d/%04d".format(dayOfMonth, month + 1, year)
+                                        FirebaseDbHelper.getAttendanceForDate(
+                                            classroomId = cid,
+                                            date = selectedDate.value,
+                                            onSuccess = { existingList ->
+                                                presentIds.clear()
+                                                absentIds.clear()
+                                                existingList.forEach {
+                                                    when (it.status) {
+                                                        "P" -> presentIds.add(it.studentId)
+                                                        "A" -> absentIds.add(it.studentId)
+                                                    }
+                                                }
+                                            },
+                                            onFailure = {
+                                                Toast.makeText(context, "Failed to fetch attendance", Toast.LENGTH_SHORT).show()
+                                            }
+                                        )
                                     },
                                     calendar.get(Calendar.YEAR),
                                     calendar.get(Calendar.MONTH),
@@ -298,7 +315,16 @@ fun DegreeDetailPage(
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center
                         ) {
-                            CircularProgressIndicator(color = colorResource(R.color.maya))
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                CircularProgressIndicator(color = colorResource(R.color.maya))
+                                Spacer(modifier = Modifier.height(20.dp))
+                                Text(
+                                    text = "Students details are fetching...⏳",
+                                    fontSize = 20.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    fontFamily = Laila
+                                )
+                            }
                         }
                     }
 
@@ -403,7 +429,8 @@ fun DegreeDetailPage(
                                         students.remove(it)
                                     },
                                     presentIds = presentIds,
-                                    absentIds = absentIds
+                                    absentIds = absentIds,
+                                    selectedDate = selectedDate.value
 
                                     )
                             }

@@ -12,4 +12,6 @@
     <color name="prem">#FF3F51B5</color>
     <color name="maya">#FFFF6F61</color>
     <color name="mygray">#E0E0E0</color>
+    <color name="presentcolor">#FF81C784</color>
+    <color name="absentcolor">#FFEF9A9A</color>
 </resources>

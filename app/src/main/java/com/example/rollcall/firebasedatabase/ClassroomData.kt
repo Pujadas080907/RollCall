@@ -220,6 +220,29 @@ fun saveDegreeDetails(
             }
             .addOnFailureListener { onFailure(it) }
     }
+    fun getAttendanceForDate(
+        classroomId: String,
+        date: String,
+        onSuccess: (List<AttendanceData>) -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        val user = FirebaseAuth.getInstance().currentUser
+        if (user == null) {
+            onFailure(Exception("User not logged in"))
+            return
+        }
+
+        Firebase.firestore.collection("attendance")
+            .whereEqualTo("userEmail", user.email)
+            .whereEqualTo("classroomId", classroomId)
+            .whereEqualTo("date", date)
+            .get()
+            .addOnSuccessListener { snap ->
+                val list = snap.documents.mapNotNull { it.toObject(AttendanceData::class.java) }
+                onSuccess(list)
+            }
+            .addOnFailureListener { onFailure(it) }
+    }
 
 
 
