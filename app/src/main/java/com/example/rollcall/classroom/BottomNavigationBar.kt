@@ -21,16 +21,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.rollcall.R
 
 @Composable
 fun BottomNavigationBar(navController: NavController) {
-    val selectedIndex = remember { mutableStateOf(0) }
     val items = listOf(
-        "Classroom" to R.drawable.homeicon,
-        "Month View" to R.drawable.monthviewicon
+        "classroompage" to R.drawable.homeicon,
+        "monthviewpage" to R.drawable.monthviewicon
     )
-//    val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+
+    val currentRoute = navController.currentBackStackEntry?.destination?.route
 
     BottomAppBar(
         modifier = Modifier
@@ -39,28 +40,32 @@ fun BottomNavigationBar(navController: NavController) {
         containerColor = colorResource(R.color.maya),
         tonalElevation = 8.dp
     ) {
-        items.forEachIndexed { index, item ->
-            val isSelected = selectedIndex.value == index
+        items.forEach { (route, iconRes) ->
+            val isSelected = currentRoute == route
 
             IconButton(
                 onClick = {
-                    selectedIndex.value = index
-                    when (index) {
-                        0 -> navController.navigate("classroompage")
-                        1 -> navController.navigate("monthviewpage")
+                    if (!isSelected) {
+                        navController.navigate(route) {
+                            launchSingleTop = true
+                            restoreState = true
+                            popUpTo(navController.graph.startDestinationId) {
+                                saveState = true
+                            }
+                        }
                     }
                 },
                 modifier = Modifier.weight(1f)
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Icon(
-                        painter = painterResource(id = item.second),
-                        contentDescription = item.first,
+                        painter = painterResource(id = iconRes),
+                        contentDescription = route,
                         modifier = Modifier.size(22.dp),
                         tint = if (isSelected) colorResource(id = R.color.prem) else Color.Black
                     )
                     Text(
-                        text = item.first,
+                        text = if (route == "classroompage") "Classroom" else "Month View",
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
                         color = if (isSelected) colorResource(id = R.color.prem) else Color.Black
@@ -70,4 +75,3 @@ fun BottomNavigationBar(navController: NavController) {
         }
     }
 }
-

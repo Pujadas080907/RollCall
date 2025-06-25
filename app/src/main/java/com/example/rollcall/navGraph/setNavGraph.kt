@@ -24,6 +24,8 @@ import com.example.rollcall.monthview.MonthViewPage
 import com.example.rollcall.authentication.AuthCheckPage
 import com.example.rollcall.degreedetail.DegreeDetailPage
 import com.example.rollcall.firebasedatabase.ClassroomData
+import com.example.rollcall.monthview.MonthDetailedViewPage
+import com.example.rollcall.monthview.ReportAndPercentagePage
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 
 @OptIn(ExperimentalAnimationApi::class)
@@ -70,7 +72,7 @@ fun SetNavGraph(authViewModel: AuthViewModel) {
         }
 
         composable(route = Routes.monthViewPage.routes) {
-            MonthViewPage()
+            MonthViewPage(navController)
         }
         composable(
             route = Routes.degreeDetailPage.routes,
@@ -116,7 +118,64 @@ fun SetNavGraph(authViewModel: AuthViewModel) {
                 initialDate = selectedDate
             )
         }
+        composable(
+            route = Routes.monthDetailedViewPage.routes,
+            arguments = listOf(
+                navArgument("degree") { type = NavType.StringType },
+                navArgument("year") { type = NavType.StringType },
+                navArgument("section") { type = NavType.StringType },
+                navArgument("cid") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val degree = backStackEntry.arguments?.getString("degree") ?: ""
+            val year = backStackEntry.arguments?.getString("year") ?: ""
+            val section = backStackEntry.arguments?.getString("section") ?: ""
+            val cid = backStackEntry.arguments?.getString("cid") ?: ""
+
+            val classroom = ClassroomData(
+                id = cid,
+                degree = degree,
+                year = year,
+                section = section
+            )
+
+            MonthDetailedViewPage(navController, classroom)
+        }
+        composable(
+            route = Routes.reportAndPercentagePage.routes,
+            arguments = listOf(
+                navArgument("degree") { type = NavType.StringType },
+                navArgument("year") { type = NavType.StringType },
+                navArgument("section") { type = NavType.StringType },
+                navArgument("cid") { type = NavType.StringType },
+                navArgument("monthName") { type = NavType.StringType },
+                navArgument("yearNum") { type = NavType.IntType }
+            )
+        ) { backStackEntry ->
+            val degree = backStackEntry.arguments?.getString("degree") ?: ""
+            val year = backStackEntry.arguments?.getString("year") ?: ""
+            val section = backStackEntry.arguments?.getString("section") ?: ""
+            val cid = backStackEntry.arguments?.getString("cid") ?: ""
+            val monthName = backStackEntry.arguments?.getString("monthName") ?: ""
+            val yearNum = backStackEntry.arguments?.getInt("yearNum") ?: 2025
+
+            val classroom = ClassroomData(
+                id = cid,
+                degree = degree,
+                year = year,
+                section = section
+            )
+
+            ReportAndPercentagePage(
+                navController = navController,
+                classroom = classroom,
+                monthName = monthName,
+                year = yearNum
+            )
+        }
+
 
 
     }
+
 }

@@ -13,10 +13,20 @@ sealed class Routes(val routes: String) {
 //    Month view
     object monthViewPage : Routes("monthviewpage")
 
+    object monthDetailedViewPage : Routes(
+        "monthdetail/{degree}/{year}/{section}/{cid}"
+    )
+
     //degree detail page
     object degreeDetailPage: Routes(
         "degdetail/{degree}/{year}/{section}/{cid}"
     )
+
+    object reportAndPercentagePage : Routes(
+        "reportandpercentage/{degree}/{year}/{section}/{cid}/{monthName}/{yearNum}"
+    )
+
+
 
     //full report page
     object fullReportPage : Routes("fullreportpage")
