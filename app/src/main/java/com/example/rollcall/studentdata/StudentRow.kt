@@ -40,18 +40,15 @@ fun StudentRow(
     onDeleteClick: (StudentData) -> Unit = {},
     presentIds: SnapshotStateList<String>,
     absentIds: SnapshotStateList<String>,
-    selectedDate: String
+    selectedDate: String,
+    attendanceAlreadyTaken: Boolean
 ) {
     val context = LocalContext.current
 
     val isPresent = remember { derivedStateOf { presentIds.contains(student.studentId) } }
     val isAbsent = remember { derivedStateOf { absentIds.contains(student.studentId) } }
 
-    val isAttendanceTaken = selectedDate.isNotEmpty() &&
-            (presentIds.contains(student.studentId) || absentIds.contains(student.studentId))
-
     var menuOpen by remember { mutableStateOf(false) }
-
     val showDialog = remember { mutableStateOf(false) }
     val studentToDelete = remember { mutableStateOf<StudentData?>(null) }
 
@@ -119,7 +116,7 @@ fun StudentRow(
             Checkbox(
                 checked = isPresent.value,
                 onCheckedChange = {
-                    if (!isAttendanceTaken) {
+                    if (!attendanceAlreadyTaken) {
                         if (it) {
                             if (!presentIds.contains(student.studentId)) presentIds.add(student.studentId)
                             absentIds.remove(student.studentId)
@@ -128,7 +125,7 @@ fun StudentRow(
                         }
                     }
                 },
-                enabled = !isAttendanceTaken,
+                enabled = !attendanceAlreadyTaken,
                 colors = CheckboxDefaults.colors(
                     checkedColor = Color.White,
                     uncheckedColor = Color.White,
@@ -148,14 +145,12 @@ fun StudentRow(
                         shape = RoundedCornerShape(2.dp)
                     )
                     .border(2.dp, Color.White, RoundedCornerShape(2.dp))
-                    .clickable(enabled = !isAttendanceTaken) {
-                        if (!isAttendanceTaken) {
-                            if (!isAbsent.value) {
-                                if (!absentIds.contains(student.studentId)) absentIds.add(student.studentId)
-                                presentIds.remove(student.studentId)
-                            } else {
-                                absentIds.remove(student.studentId)
-                            }
+                    .clickable(enabled = !attendanceAlreadyTaken) {
+                        if (!isAbsent.value) {
+                            if (!absentIds.contains(student.studentId)) absentIds.add(student.studentId)
+                            presentIds.remove(student.studentId)
+                        } else {
+                            absentIds.remove(student.studentId)
                         }
                     },
                 contentAlignment = Alignment.Center

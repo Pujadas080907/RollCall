@@ -92,6 +92,7 @@ fun DegreeDetailPage(
     val loading   = remember { mutableStateOf(true) }
     val query     = remember { mutableStateOf("") }
     val studentToEdit = remember { mutableStateOf<StudentData?>(null) }
+    val attendanceAlreadyTaken = remember { mutableStateOf(false) }
 
     val context = LocalContext.current
     val selectedDate = remember { mutableStateOf("") }
@@ -116,6 +117,27 @@ fun DegreeDetailPage(
             onSuccess = { students.addAll(it); loading.value = false },
             onFailure = { loading.value = false }
         )
+    }
+
+    LaunchedEffect(selectedDate.value) {
+        if (selectedDate.value.isNotEmpty()) {
+            FirebaseDbHelper.getAttendanceForDate(
+                classroomId = cid,
+                date = selectedDate.value,
+                onSuccess = { attendanceList ->
+                    presentIds.clear()
+                    absentIds.clear()
+
+                    presentIds.addAll(attendanceList.filter { it.status == "P" }.map { it.studentId })
+                    absentIds.addAll(attendanceList.filter { it.status == "A" }.map { it.studentId })
+
+                    attendanceAlreadyTaken.value = attendanceList.isNotEmpty()
+                },
+                onFailure = {
+                    Toast.makeText(context, "Failed to load attendance", Toast.LENGTH_SHORT).show()
+                }
+            )
+        }
     }
 
     val filtered = students.filter {
@@ -430,8 +452,8 @@ fun DegreeDetailPage(
                                     },
                                     presentIds = presentIds,
                                     absentIds = absentIds,
-                                    selectedDate = selectedDate.value
-
+                                    selectedDate = selectedDate.value,
+                                    attendanceAlreadyTaken = attendanceAlreadyTaken.value
                                     )
                             }
                         }

@@ -25,6 +25,7 @@ import com.example.rollcall.authentication.AuthCheckPage
 import com.example.rollcall.degreedetail.DegreeDetailPage
 import com.example.rollcall.firebasedatabase.ClassroomData
 import com.example.rollcall.monthview.MonthDetailedViewPage
+import com.example.rollcall.monthview.PercentagePage
 import com.example.rollcall.monthview.ReportAndPercentagePage
 import com.example.rollcall.monthview.attendancereport.AttendanceReportPage
 import com.google.accompanist.navigation.animation.AnimatedNavHost
@@ -195,6 +196,31 @@ fun SetNavGraph(authViewModel: AuthViewModel) {
             val classroom = ClassroomData(degree, year, section, cid)
             AttendanceReportPage(navController, classroom, monthName, yearNum)
         }
+
+        composable(
+            Routes.percentagePage.routes,
+            arguments = listOf(
+                navArgument("degree") { type = NavType.StringType },
+                navArgument("year") { type = NavType.StringType },
+                navArgument("section") { type = NavType.StringType },
+                navArgument("cid") { type = NavType.StringType },
+                navArgument("monthName") { type = NavType.StringType },
+                navArgument("yearNum") { type = NavType.StringType },
+            )
+        ) { backStackEntry ->
+            val classroom = ClassroomData(
+                degree = backStackEntry.arguments?.getString("degree") ?: "",
+                year = backStackEntry.arguments?.getString("year") ?: "",
+                section = backStackEntry.arguments?.getString("section") ?: "",
+                id = backStackEntry.arguments?.getString("cid") ?: "",
+                userEmail = "" // if needed
+            )
+            val month = backStackEntry.arguments?.getString("monthName") ?: ""
+            val yearNum = backStackEntry.arguments?.getString("yearNum")?.toIntOrNull() ?: 0
+
+            PercentagePage(navController, classroom, month, yearNum)
+        }
+
 
 
 

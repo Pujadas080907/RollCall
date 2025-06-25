@@ -29,6 +29,9 @@ sealed class Routes(val routes: String) {
     object attendanceReportPage : Routes(
         "attendancereport/{degree}/{year}/{section}/{cid}/{monthName}/{yearNum}"
     )
+    object percentagePage : Routes(
+        "percentagePage/{degree}/{year}/{section}/{cid}/{monthName}/{yearNum}"
+    )
 
     //full report page
     object fullReportPage : Routes("fullreportpage")

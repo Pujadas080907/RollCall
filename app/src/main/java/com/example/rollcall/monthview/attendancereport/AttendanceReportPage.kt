@@ -210,7 +210,6 @@ fun AttendanceReportPage(
                         }
                         Spacer(modifier = Modifier.width(45.dp))
                         Text(
-//                            text = "$monthName - $year",
                             text = "${currentMonthName.value} - ${currentYear.value}",
 
                             fontSize = 20.sp,

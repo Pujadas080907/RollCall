@@ -204,7 +204,16 @@ fun ReportAndPercentagePage(
                 imageRes = R.drawable.report,
                 title = "SEE PERCENTAGE",
                 onClick = {
-                    // TODO: Add navigation to percentage page
+                    val route = Routes.percentagePage.routes
+                        .replace("{degree}", Uri.encode(classroom.degree))
+                        .replace("{year}", Uri.encode(classroom.year))
+                        .replace("{section}", Uri.encode(classroom.section))
+                        .replace("{cid}", classroom.id)
+                        .replace("{monthName}", Uri.encode(currentMonthName.value))
+                        .replace("{yearNum}", currentYear.value.toString())
+
+                    navController.navigate(route)
+
                 }
             )
         }
