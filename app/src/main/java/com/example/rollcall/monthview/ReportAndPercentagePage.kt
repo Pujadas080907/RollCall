@@ -1,4 +1,5 @@
 package com.example.rollcall.monthview
+import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -29,6 +30,7 @@ import androidx.navigation.NavController
 import com.example.rollcall.R
 import com.example.rollcall.classroom.BottomNavigationBar
 import com.example.rollcall.firebasedatabase.ClassroomData
+import com.example.rollcall.navGraph.Routes
 import com.example.rollcall.ui.theme.Laila
 import com.example.rollcall.ui.theme.Lalezar
 import java.text.SimpleDateFormat
@@ -183,9 +185,14 @@ fun ReportAndPercentagePage(
                 imageRes = R.drawable.student3,
                 title = "SEE REPORT",
                 onClick = {
-                    // Navigate to full report
-                    val date = "$monthName-$year"
-                    val route = "fullreportpage/${classroom.degree}/${classroom.year}/${classroom.section}/${classroom.id}/$date"
+                    val route = Routes.attendanceReportPage.routes
+                        .replace("{degree}", Uri.encode(classroom.degree))
+                        .replace("{year}", Uri.encode(classroom.year))
+                        .replace("{section}", Uri.encode(classroom.section))
+                        .replace("{cid}", classroom.id)
+                        .replace("{monthName}", Uri.encode(currentMonthName.value))
+                        .replace("{yearNum}", currentYear.value.toString())
+
                     navController.navigate(route)
                 }
             )

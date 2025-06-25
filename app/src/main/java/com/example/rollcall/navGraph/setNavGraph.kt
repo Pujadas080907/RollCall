@@ -26,6 +26,7 @@ import com.example.rollcall.degreedetail.DegreeDetailPage
 import com.example.rollcall.firebasedatabase.ClassroomData
 import com.example.rollcall.monthview.MonthDetailedViewPage
 import com.example.rollcall.monthview.ReportAndPercentagePage
+import com.example.rollcall.monthview.attendancereport.AttendanceReportPage
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 
 @OptIn(ExperimentalAnimationApi::class)
@@ -172,6 +173,27 @@ fun SetNavGraph(authViewModel: AuthViewModel) {
                 monthName = monthName,
                 year = yearNum
             )
+        }
+        composable(
+            route = Routes.attendanceReportPage.routes,
+            arguments = listOf(
+                navArgument("degree") { type = NavType.StringType },
+                navArgument("year") { type = NavType.StringType },
+                navArgument("section") { type = NavType.StringType },
+                navArgument("cid") { type = NavType.StringType },
+                navArgument("monthName") { type = NavType.StringType },
+                navArgument("yearNum") { type = NavType.IntType }
+            )
+        ) {
+            val degree = it.arguments?.getString("degree") ?: ""
+            val year = it.arguments?.getString("year") ?: ""
+            val section = it.arguments?.getString("section") ?: ""
+            val cid = it.arguments?.getString("cid") ?: ""
+            val monthName = it.arguments?.getString("monthName") ?: ""
+            val yearNum = it.arguments?.getInt("yearNum") ?: 2025
+
+            val classroom = ClassroomData(degree, year, section, cid)
+            AttendanceReportPage(navController, classroom, monthName, yearNum)
         }
 
 
