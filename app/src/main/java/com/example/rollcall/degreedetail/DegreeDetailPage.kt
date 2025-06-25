@@ -84,6 +84,7 @@ fun DegreeDetailPage(
     section: String,
     cid: String
 ) {
+
     val showAddDialog   = remember { mutableStateOf(false) }
     val fullName        = remember { mutableStateOf("") }
     val enrollment      = remember { mutableStateOf("") }
