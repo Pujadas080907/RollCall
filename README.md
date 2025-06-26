@@ -10,7 +10,7 @@
 Here’s a glimpse of My RollCall App in action:
 | Login | SignUp | Add Batch | Classroom |
 |------------|----------------|------------------|---------|
-| ![Home](https://github.com/Pujadas080907/RollCall/blob/main/Screenshot_2025-06-26-00-58-10-44_841d5b5218ea89a4f3ce991962a8c268.jpg) | ![Report Issue](https://github.com/Pujadas080907/RollCall/blob/main/a.jpg) | ![Your City Issues](https://github.com/Pujadas080907/RollCall/blob/main/b.jpg) | ![Profile](https://github.com/Pujadas080907/RollCall/blob/main/c.jpg) |
+| ![Home](https://github.com/Pujadas080907/RollCall/blob/main/Screenshot_2025-06-26-00-58-10-44_841d5b5218ea89a4f3ce991962a8c268.jpg) | ![Report Issue](https://github.com/Pujadas080907/RollCall/blob/main/signup.jpg) | ![Your City Issues](https://github.com/Pujadas080907/RollCall/blob/main/b.jpg) | ![Profile](https://github.com/Pujadas080907/RollCall/blob/main/c.jpg) |
 
 | Students | Calender | Attendance | Month View |
 |------------|----------------|------------------|---------|
