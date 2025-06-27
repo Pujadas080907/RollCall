@@ -82,7 +82,7 @@ fun FullReportPage(
                                     enrollment = student.enrollment
                                 )
                             }
-                        }
+                        }.sortedBy { it.enrollment.lowercase() }
 
                         attendanceList.clear()
                         attendanceList.addAll(updatedAttendance)

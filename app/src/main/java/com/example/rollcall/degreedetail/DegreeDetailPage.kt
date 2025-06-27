@@ -147,6 +147,7 @@ fun DegreeDetailPage(
                 it.fullName.lowercase().contains(q) ||
                 it.enrollment.lowercase().contains(q)
     }
+        .sortedBy { it.enrollment.lowercase() }
 
     Scaffold(
         topBar = {
@@ -243,10 +244,17 @@ fun DegreeDetailPage(
                                             Icon(painterResource(R.drawable.edit), contentDescription = null,
                                                 Modifier.size(20.dp))
                                             Spacer(modifier = Modifier.width(8.dp))
-                                            Text("Coming soon", fontSize = 15.sp, fontFamily = Laila)
+                                            Text("Edit Report", fontSize = 15.sp, fontFamily = Laila)
                                         }
                                     },
-                                    onClick = { /* TODO */ }
+                                    onClick = {
+                                        val encodedDate = URLEncoder.encode(selectedDate.value, "UTF-8")
+
+                                        val route = "editreportpage/${classroom.degree}/${classroom.year}/${classroom.section}/${classroom.id}/$encodedDate"
+                                        navController.navigate(route)
+
+
+                                    }
                                 )
                             }
                         }

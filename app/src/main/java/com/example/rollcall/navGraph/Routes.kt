@@ -32,7 +32,11 @@ sealed class Routes(val routes: String) {
     object percentagePage : Routes(
         "percentagePage/{degree}/{year}/{section}/{cid}/{monthName}/{yearNum}"
     )
-
+    object editReportPage : Routes(
+        "editreportpage/{degree}/{year}/{section}/{cid}/{date}"
+    )
     //full report page
     object fullReportPage : Routes("fullreportpage")
+
+
 }

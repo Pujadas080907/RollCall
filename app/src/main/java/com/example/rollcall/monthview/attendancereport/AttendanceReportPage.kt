@@ -131,8 +131,9 @@ fun AttendanceReportPage(
         FirebaseDbHelper.getStudentsByClassroom(
             classroomId = classroom.id,
             onSuccess = {
+                val sortedList = it.sortedBy { s -> s.enrollment.lowercase() }
                 students.clear()
-                students.addAll(it)
+                students.addAll(sortedList)
             },
             onFailure = { /* handle error */ }
         )

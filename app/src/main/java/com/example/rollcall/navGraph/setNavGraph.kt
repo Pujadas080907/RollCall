@@ -15,6 +15,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.rollcall.Reports.EditReportPage
 import com.example.rollcall.Reports.FullReportPage
 import com.example.rollcall.authentication.AuthViewModel
 import com.example.rollcall.authentication.LoginPage
@@ -220,6 +221,29 @@ fun SetNavGraph(authViewModel: AuthViewModel) {
 
             PercentagePage(navController, classroom, month, yearNum)
         }
+
+        composable(
+            Routes.editReportPage.routes,
+            arguments = listOf(
+                navArgument("degree") { type = NavType.StringType },
+                navArgument("year") { type = NavType.StringType },
+                navArgument("section") { type = NavType.StringType },
+                navArgument("cid") { type = NavType.StringType }, // ✅ FIXED
+                navArgument("date") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val degree = backStackEntry.arguments?.getString("degree") ?: ""
+            val year = backStackEntry.arguments?.getString("year") ?: ""
+            val section = backStackEntry.arguments?.getString("section") ?: ""
+            val classroomId = backStackEntry.arguments?.getString("cid") ?: "" // ✅ FIXED
+            val date = backStackEntry.arguments?.getString("date") ?: ""
+
+            val classroom = ClassroomData(degree, year, section, classroomId)
+
+            EditReportPage(navController, classroom, date)
+        }
+
+
 
 
 

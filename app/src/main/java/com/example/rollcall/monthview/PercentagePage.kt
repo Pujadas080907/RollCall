@@ -116,8 +116,9 @@ fun PercentagePage(
         FirebaseDbHelper.getStudentsByClassroom(
             classroom.id,
             onSuccess = {
+                val sortedList = it.sortedBy { s -> s.enrollment.lowercase() }
                 students.clear()
-                students.addAll(it)
+                students.addAll(sortedList)
             },
             onFailure = {}
         )
@@ -168,6 +169,7 @@ fun PercentagePage(
                         Spacer(modifier = Modifier.width(45.dp))
                         Text(
                             text = "${currentMonthName.value} - ${currentYear.value}",
+
                             fontSize = 20.sp,
                             color = Color.White,
                             fontWeight = FontWeight.Bold,

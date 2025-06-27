@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "1014241138424",
+    "firebase_url": "https://rollcall-baf13-default-rtdb.firebaseio.com",
     "project_id": "rollcall-baf13",
     "storage_bucket": "rollcall-baf13.firebasestorage.app"
   },
