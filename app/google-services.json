@@ -42,6 +42,43 @@
           ]
         }
       }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1014241138424:android:af288cdd7a0aa085480d0d",
+        "android_client_info": {
+          "package_name": "com.pujadas.rollcall"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1014241138424-5cqfut30j2h2iee06jk5r9hcknrhehp6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.pujadas.rollcall",
+            "certificate_hash": "3a0fc0fad63edb1a215d19ebe074698ae766cdbf"
+          }
+        },
+        {
+          "client_id": "1014241138424-b69ibh57cdperg3ha2ag6t43ubm0fhek.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCL4PIejLTSbcm9ZTPKxsnhUhqsesQF_rI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1014241138424-b69ibh57cdperg3ha2ag6t43ubm0fhek.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
     }
   ],
   "configuration_version": "1"
