@@ -9,9 +9,20 @@
     <color name="white">#FFFFFFFF</color>
 
 
-    <color name="prem">#FF3F51B5</color>
-    <color name="maya">#FFFF6F61</color>
+<!--    <color name="prem">#FF3F51B5</color>-->
+<!--    <color name="maya">#FFFF6F61</color>-->
+
+
+    <color name="prem">#8FA3FF</color>
+    <color name="maya">#FFB38A</color>
     <color name="mygray">#E0E0E0</color>
     <color name="presentcolor">#FF81C784</color>
     <color name="absentcolor">#FFEF9A9A</color>
+    <color name="card">#FFFFFF</color>
+    <color name="stdcard">#EEF2FF</color>
+    <color name="border">#C4D0FF</color>
+    <color name="bnb">#EBEAEA</color>
+    <color name="cardhome">#FFE0CC</color>
+
+
 </resources>

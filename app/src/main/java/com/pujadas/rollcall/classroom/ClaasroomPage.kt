@@ -727,10 +727,9 @@ fun ClassroomCard(
         Box(
             modifier = Modifier
                 .fillMaxSize()
+                .border(width = 1.dp, colorResource(R.color.maya),shape = RoundedCornerShape(16.dp))
                 .background(
-                    Brush.verticalGradient(
-                        listOf(colorResource(R.color.maya), colorResource(R.color.prem))
-                    )
+                    colorResource(R.color.cardhome)
                 )
         ) {
             // Top-right icon with dropdown trigger
@@ -742,7 +741,7 @@ fun ClassroomCard(
                         .padding(8.dp)
                         .size(20.dp)
                         .clickable { expanded = true },
-                    tint = Color.White
+                    tint = Color.Black
                 )
 
                 DropdownMenu(
@@ -793,8 +792,8 @@ fun ClassroomCard(
                     modifier = Modifier.size(60.dp)
                 )
                 Spacer(modifier = Modifier.height(4.dp))
-                Text(classroom.degree, color = Color.White, fontWeight = FontWeight.Bold, fontFamily = Laila)
-                Text("${classroom.year} / Sec : ${classroom.section}", color = Color.White, fontSize = 12.sp, fontFamily = Laila)
+                Text(classroom.degree, color = Color.Black, fontWeight = FontWeight.Bold, fontFamily = Laila)
+                Text("${classroom.year} / Sec : ${classroom.section}", color = Color.Black, fontSize = 12.sp, fontFamily = Laila)
             }
         }
     }

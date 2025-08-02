@@ -56,6 +56,11 @@ fun StudentRow(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 5.dp)
+            .border(
+                width = 0.5.dp,
+                color = colorResource(R.color.border),
+                shape = RoundedCornerShape(0.dp)
+            )
             .combinedClickable(
                 onClick = {},
                 onLongClick = { menuOpen = true }
@@ -66,12 +71,7 @@ fun StudentRow(
         Row(
             modifier = Modifier
                 .background(
-                    Brush.horizontalGradient(
-                        listOf(
-                            colorResource(R.color.maya),
-                            colorResource(R.color.prem),
-                        )
-                    )
+                    colorResource(R.color.stdcard)
                 )
                 .padding(horizontal = 8.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically
@@ -80,7 +80,7 @@ fun StudentRow(
 
             Box(
                 modifier = Modifier
-                    .size(36.dp)
+                    .size(40.dp)
                     .background(Color.White, CircleShape),
                 contentAlignment = Alignment.Center
             ) {
@@ -88,7 +88,7 @@ fun StudentRow(
                     painterResource(R.drawable.studenticon),
                     contentDescription = null,
                     tint = Color.Unspecified,
-                    modifier = Modifier.size(22.dp)
+                    modifier = Modifier.size(24.dp)
                 )
             }
 
@@ -97,7 +97,7 @@ fun StudentRow(
             Column(Modifier.weight(1f)) {
                 Text(
                     text = student.fullName,
-                    color = Color.White,
+                    color = Color.Black,
                     fontFamily = Laila,
                     fontWeight = FontWeight.ExtraBold,
                     fontSize = 18.sp
@@ -105,13 +105,13 @@ fun StudentRow(
 
                 Text(
                     text = student.enrollment,
-                    color = Color.White,
+                    color = Color.Black,
                     fontFamily = Laila,
                     fontSize = 13.sp
                 )
             }
 
-            Text("P", color = Color.White, fontFamily = Laila)
+            Text("P", color = Color.Black, fontFamily = Laila)
 
             Checkbox(
                 checked = isPresent.value,
@@ -127,13 +127,13 @@ fun StudentRow(
                 },
                 enabled = !attendanceAlreadyTaken,
                 colors = CheckboxDefaults.colors(
-                    checkedColor = Color.White,
-                    uncheckedColor = Color.White,
+                    checkedColor = Color.Black,
+                    uncheckedColor = Color.Black,
                     checkmarkColor = Color.Green
                 )
             )
 
-            Text("A", color = Color.White, fontFamily = Laila)
+            Text("A", color = Color.Black, fontFamily = Laila)
 
             Spacer(Modifier.width(8.dp))
 
@@ -141,10 +141,10 @@ fun StudentRow(
                 modifier = Modifier
                     .size(20.dp)
                     .background(
-                        color = if (isAbsent.value) Color.White else Color.Transparent,
+                        color = if (isAbsent.value) Color.Black else Color.Transparent,
                         shape = RoundedCornerShape(2.dp)
                     )
-                    .border(2.dp, Color.White, RoundedCornerShape(2.dp))
+                    .border(2.dp, Color.Black, RoundedCornerShape(2.dp))
                     .clickable(enabled = !attendanceAlreadyTaken) {
                         if (!isAbsent.value) {
                             if (!absentIds.contains(student.studentId)) absentIds.add(student.studentId)

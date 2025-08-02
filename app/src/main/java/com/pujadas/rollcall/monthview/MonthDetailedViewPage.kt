@@ -3,6 +3,7 @@ package com.pujadas.rollcall.monthview
 import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -166,6 +167,7 @@ fun MonthDetailedViewPage(navController: NavController, classroom: ClassroomData
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(60.dp)
+                        .border(1.dp,colorResource(R.color.border),RoundedCornerShape(16.dp))
                         .clickable {
                             val route = Routes.reportAndPercentagePage.routes
                                 .replace("{degree}", Uri.encode(classroom.degree))
@@ -184,11 +186,14 @@ fun MonthDetailedViewPage(navController: NavController, classroom: ClassroomData
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            .background(
-                                Brush.horizontalGradient(
-                                    listOf(colorResource(R.color.maya), colorResource(R.color.prem))
-                                )
-                            )
+//                            .background(
+//                                Brush.horizontalGradient(
+//                                    listOf(colorResource(R.color.maya), colorResource(R.color.prem))
+//                                )
+//                            )
+
+                            .background(colorResource(R.color.card))
+
                     ) {
                         Row(
                             modifier = Modifier

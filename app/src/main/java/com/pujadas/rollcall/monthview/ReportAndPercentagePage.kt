@@ -2,6 +2,7 @@ package com.pujadas.rollcall.monthview
 import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -230,13 +231,10 @@ fun ReportCard(imageRes: Int, title: String, onClick: () -> Unit) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
+                .border(1.dp, colorResource(R.color.border), shape = RoundedCornerShape(16.dp))
                 .background(
-                    Brush.verticalGradient(
-                        listOf(
-                            colorResource(R.color.maya),
-                            colorResource(R.color.prem)
-                        )
-                    )
+
+                    colorResource(R.color.stdcard)
                 ),
             contentAlignment = Alignment.Center
         ) {
